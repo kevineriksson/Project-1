@@ -1,0 +1,62 @@
+version: "3.9"
+
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: ch_server
+    ports:
+      - "8123:8123"   # HTTP
+      - "9000:9000"   # Native
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - ./clickhouse/init:/docker-entrypoint-initdb.d
+    environment:
+      CLICKHOUSE_DB: bronze
+      CLICKHOUSE_USER: analytics
+      CLICKHOUSE_PASSWORD: analytics_pw
+
+  airflow-db:
+    image: postgres:16
+    container_name: airflow_db
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - airflow_db_data:/var/lib/postgresql/data
+
+  airflow:
+    image: apache/airflow:2.9.0
+    container_name: airflow_main
+    depends_on:
+      - airflow-db
+      - clickhouse
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
+      AIRFLOW__WEBSERVER__RBAC: "True"
+      AIRFLOW__CORE__FERNET_KEY: "not-secure-dev-key"
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "False"
+      AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_USER: analytics
+      CLICKHOUSE_PASSWORD: analytics_pw
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./dbt:/opt/dbt
+      - ./airflow/requirements.txt:/requirements.txt
+    command: >
+      /bin/bash -c "
+      pip install --no-cache-dir -r /requirements.txt &&
+      airflow db upgrade &&
+      airflow users create --username admin --password admin --firstname a --lastname b --role Admin --email admin@example.com || true &&
+      airflow scheduler &
+      airflow webserver
+      "
+    ports:
+      - "8080:8080"
+
+volumes:
+  clickhouse_data:
+  airflow_db_data:
