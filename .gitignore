@@ -1,1 +1,29 @@
+# --- DEPENDENCY AND BUILD FILES ---
 .DS_Store
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+/venv/
+.pytest_cache/
+
+# --- DOCKER DATA VOLUMES (CRITICAL) ---
+# These folders contain runtime data, configuration, or temporary files
+# and should NEVER be committed to Git.
+
+# ClickHouse Data (Database storage)
+/clickhouse_data/
+
+# PostgreSQL Data (Airflow Metadata Database storage)
+/pgdata_airflow/
+
+# Airflow Runtime Logs and Metadata
+/airflow/logs/
+/airflow/dags/raw/ # Raw downloaded data (can be large)
+/airflow/dags/__pycache__/
+/airflow/dags/.mypy_cache/
+
+# --- DBT FILES ---
+# dbt artifacts and compiled models
+/dbt/target/
+/dbt/dbt_packages/

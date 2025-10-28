@@ -1,0 +1,4 @@
+# Dependencies for the dbt transformation service
+dbt-core==1.7.0
+dbt-clickhouse==1.7.0
+clickhouse-connect==0.7.0

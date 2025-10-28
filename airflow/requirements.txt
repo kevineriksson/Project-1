@@ -1,7 +1,5 @@
-apache-airflow==2.9.0
 apache-airflow-providers-http
-clickhouse-connect
+clickhouse-connect==0.7.0
 pandas
 requests
 dbt-core
-dbt-clickhouse
