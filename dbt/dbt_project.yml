@@ -1,0 +1,17 @@
+name: "movie_warehouse"
+version: "1.0.0"
+config-version: 2
+
+profile: "movie_clickhouse"
+
+model-paths: ["models"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  movie_warehouse:
+    +materialized: table
+    bronze:
+      +schema: bronze
+    gold:
+      +schema: gold
