@@ -1,0 +1,31 @@
+version: 2
+
+models:
+  - name: dim_movie
+    columns:
+      - name: movie_id
+        tests: [not_null, unique]
+
+  - name: dim_genre
+    columns:
+      - name: genre_id
+        tests: [not_null, unique]
+
+  - name: dim_release_date
+    columns:
+      - name: release_id
+        tests: [not_null, unique]
+
+  - name: dim_production
+    columns:
+      - name: prod_id
+        tests: [not_null, unique]
+
+  - name: fact_movie
+    columns:
+      - name: fact_id
+        tests: [not_null, unique]
+      - name: movie_id
+        tests: [not_null]
+      - name: release_id
+        tests: [not_null]
