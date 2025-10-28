@@ -23,11 +23,10 @@ services:
         soft: 262144
         hard: 262144
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8123/ping"]
-      interval: 10s       # Check less frequently
-      timeout: 5s         # Timeout for each check
-      retries: 30         # Allow more failed checks before giving up
-      start_period: 30s   # <-- CRITICAL: Wait 30 seconds before even starting checks
+      test: ["CMD", "clickhouse-client", "--query", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: always
 
 
