@@ -1,12 +1,10 @@
-version: "3.9"
-
 services:
   clickhouse:
     image: clickhouse/clickhouse-server:latest
     container_name: ch_server
     ports:
-      - "8123:8123"   # HTTP
-      - "9000:9000"   # Native
+      - "8123:8123"
+      - "9000:9000"
     volumes:
       - clickhouse_data:/var/lib/clickhouse
       - ./clickhouse/init:/docker-entrypoint-initdb.d
@@ -26,8 +24,9 @@ services:
       - airflow_db_data:/var/lib/postgresql/data
 
   airflow:
-    image: apache/airflow:2.9.0
+    image: apache/airflow:2.9.0-python3.12
     container_name: airflow_main
+    platform: linux/amd64
     depends_on:
       - airflow-db
       - clickhouse
@@ -35,27 +34,30 @@ services:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__CORE__LOAD_EXAMPLES: "False"
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
-      AIRFLOW__WEBSERVER__RBAC: "True"
       AIRFLOW__CORE__FERNET_KEY: "not-secure-dev-key"
-      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "False"
       AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
+      AIRFLOW__WEBSERVER__PORT: 8080
       CLICKHOUSE_HOST: clickhouse
       CLICKHOUSE_USER: analytics
       CLICKHOUSE_PASSWORD: analytics_pw
+    ports:
+      - "8090:8080"
     volumes:
       - ./airflow/dags:/opt/airflow/dags
-      - ./dbt:/opt/dbt
       - ./airflow/requirements.txt:/requirements.txt
+      - ./dbt:/opt/dbt
+    entrypoint: /bin/bash
     command: >
-      /bin/bash -c "
-      pip install --no-cache-dir -r /requirements.txt &&
-      airflow db upgrade &&
-      airflow users create --username admin --password admin --firstname a --lastname b --role Admin --email admin@example.com || true &&
-      airflow scheduler &
-      airflow webserver
+      -c "
+        pip install --no-cache-dir -r /requirements.txt;
+        echo 'Waiting for Postgres...';
+        until pg_isready -h airflow-db -p 5432 -U airflow; do sleep 1; done;
+        echo 'Initializing Airflow DB...';
+        airflow db init;
+        airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com || true;
+        airflow scheduler &
+        exec airflow webserver
       "
-    ports:
-      - "8080:8080"
 
 volumes:
   clickhouse_data:
