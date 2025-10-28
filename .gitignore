@@ -6,6 +6,8 @@ __pycache__/
 .venv/
 /venv/
 .pytest_cache/
+.tsv
+.csv
 
 # --- DOCKER DATA VOLUMES (CRITICAL) ---
 # These folders contain runtime data, configuration, or temporary files
