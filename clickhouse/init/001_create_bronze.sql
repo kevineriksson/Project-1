@@ -43,3 +43,17 @@ CREATE TABLE IF NOT EXISTS bronze.imdb_title_crew_raw
 )
 ENGINE = MergeTree
 ORDER BY (tconst, ingestion_date);
+
+-- NEW TABLE: IMDb Name Basics
+CREATE TABLE IF NOT EXISTS bronze.imdb_name_basics_raw
+(
+    nconst String,
+    primaryName String,
+    birthYear Nullable(UInt16),
+    deathYear Nullable(UInt16),
+    primaryProfession String,
+    knownForTitles String,
+    ingestion_date Date
+)
+ENGINE = MergeTree
+ORDER BY (nconst, ingestion_date);

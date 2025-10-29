@@ -8,6 +8,7 @@ __pycache__/
 .pytest_cache/
 .tsv
 .csv
+.zip
 
 # --- DOCKER DATA VOLUMES (CRITICAL) ---
 # These folders contain runtime data, configuration, or temporary files

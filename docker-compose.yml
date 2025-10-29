@@ -8,16 +8,15 @@ services:
     image: clickhouse/clickhouse-server
     container_name: clickhouse-server
     environment:
-      # Credentials used by both Airflow and dbt
       CLICKHOUSE_USER: dbt_user
       CLICKHOUSE_PASSWORD: dbt_password
       CLICKHOUSE_DB: data_warehouse
     ports:
-      - "8123:8123" # HTTP interface
-      - "9000:9000" # Native client interface
+      - "8123:8123"
+      - "9000:9000"
     volumes:
-      - ./clickhouse_data:/var/lib/clickhouse/ # Persist data
-      - ./sql:/sql # Mount SQL scripts
+      - ./clickhouse_data:/var/lib/clickhouse/
+      - ./sql:/sql
     ulimits:
       nofile:
         soft: 262144
@@ -29,38 +28,33 @@ services:
       retries: 5
     restart: always
 
-
   # ----------------------------------------
   # 2. dbt (Data Build Tool)
   # ----------------------------------------
   dbt:
-    # Build dbt container from the custom dbt/Dockerfile
     build:
       context: .
-      dockerfile: dbt/Dockerfile # Assumes dbt/Dockerfile exists
-    image: my_project_dbt:latest # Custom image name
+      dockerfile: dbt/Dockerfile
+    image: my_project_dbt:latest
     container_name: dbt
     depends_on:
       clickhouse-server:
-        condition: service_healthy # Wait for ClickHouse
+        condition: service_healthy
     volumes:
-      # Mount the entire project so dbt can see dbt_project.yml, models, etc.
-      - .:/usr/app 
-    working_dir: /usr/app # Set working directory to the project root
+      - .:/usr/app
+    working_dir: /usr/app
     environment:
-      DBT_PROFILES_DIR: /usr/app/.dbt 
-      # Environment variables for dbt profiles.yml connection
+      DBT_PROFILES_DIR: /usr/app/.dbt
       CLICKHOUSE_HOST: clickhouse-server
       CLICKHOUSE_USER: dbt_user
       CLICKHOUSE_PASSWORD: dbt_password
       CLICKHOUSE_PORT: 9000
       CLICKHOUSE_DATABASE: data_warehouse
     tty: true
-    command: tail -f /dev/null # Keep container running
-
+    command: tail -f /dev/null
 
   # ----------------------------------------
-  # 3. Airflow Components (Custom Build)
+  # 3. Airflow Components
   # ----------------------------------------
   airflow-db:
     container_name: airflow-db
@@ -77,23 +71,20 @@ services:
       retries: 5
     restart: always
 
-  # --- Custom Airflow Image Definition ---
   airflow-base:
-    # Build Airflow containers from the custom Dockerfile in the root
     build:
       context: .
-      dockerfile: Dockerfile # Assumes Dockerfile exists in root
-    image: my_project_airflow:2.8.1 # Custom image name
-    # The image is only built, not run as a service itself
+      dockerfile: Dockerfile
+    image: my_project_airflow:2.8.1
 
   airflow-init:
-    image: my_project_airflow:2.8.1 # Use the custom built image
+    image: my_project_airflow:2.8.1
     container_name: airflow-init
     entrypoint: /bin/bash
     command:
       - -c
       - |
-        /bin/bash -c "while !</dev/tcp/airflow-db/5432; do sleep 1; done;" 
+        /bin/bash -c "while !</dev/tcp/airflow-db/5432; do sleep 1; done;"
         airflow db init
         airflow users create \
           --username airflow \
@@ -105,41 +96,47 @@ services:
     environment:
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
     volumes:
-      - ./airflow/dags:/opt/airflow/dags 
+      - ./airflow/dags:/opt/airflow/dags
     depends_on:
       - airflow-db
     restart: "no"
 
   airflow-webserver:
-    image: my_project_airflow:2.8.1 # Use the custom built image
+    image: my_project_airflow:2.8.1
     container_name: airflow-webserver
     command: webserver
     environment:
+      CLICKHOUSE_HOST: clickhouse-server
+      CLICKHOUSE_USER: dbt_user
+      CLICKHOUSE_PASSWORD: dbt_password
+      KAGGLE_USERNAME: maxcu1
+      KAGGLE_KEY: 6959be0bd71277228eb41b92cc750fbe
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
-      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
-      AIRFLOW__API__AUTH_BACKENDS: "airflow.api.auth.backend.basic_auth"
-      # Connection to ClickHouse for Airflow tasks/Hooks
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth
       AIRFLOW_CONN_CLICKHOUSE_DEFAULT: clickhouse://dbt_user:dbt_password@clickhouse-server:9000/data_warehouse
     ports:
       - "8080:8080"
     volumes:
       - ./airflow/dags:/opt/airflow/dags
       - ./airflow/logs:/opt/airflow/logs
-      - .:/opt/airflow/project_root # Mount project root for dbt-run scripts etc.
+      - .:/opt/airflow/project_root
     depends_on:
       - airflow-init
       - clickhouse-server
     restart: always
 
   airflow-scheduler:
-    image: my_project_airflow:2.8.1 # Use the custom built image
+    image: my_project_airflow:2.8.1
     container_name: airflow-scheduler
     command: scheduler
     environment:
+      KAGGLE_USERNAME: maxcu1
+      KAGGLE_KEY: 6959be0bd71277228eb41b92cc750fbe
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
-      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
       AIRFLOW_CONN_CLICKHOUSE_DEFAULT: clickhouse://dbt_user:dbt_password@clickhouse-server:9000/data_warehouse
     volumes:
       - ./airflow/dags:/opt/airflow/dags
