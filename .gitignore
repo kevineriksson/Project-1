@@ -29,4 +29,6 @@ __pycache__/
 # --- DBT FILES ---
 # dbt artifacts and compiled models
 /dbt/target/
-/dbt/dbt_packages/
+/dbt/dbt_packages/airflow/dags/raw/*
+clickhouse_data/*
+pgdata_airflow/*
