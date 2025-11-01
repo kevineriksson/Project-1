@@ -217,14 +217,16 @@ def load_clickhouse_bronze(**context):
 def run_dbt_gold(**context):
     cmd = [
         "dbt", "run",
-        "--project-dir", "/opt/dbt",
-        "--profiles-dir", "/opt/dbt",
+        "--project-dir", "/opt/airflow/project_root/dbt",
+        "--profiles-dir", "/opt/airflow/project_root/dbt",
         "--select", "gold"
     ]
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
         raise AirflowFailException(f"dbt run failed:\n{result.stdout}\n{result.stderr}")
     return result.stdout
+
+
 
 
 # --- TASK 7: RUN DBT TESTS ---

@@ -6,12 +6,14 @@ CREATE TABLE IF NOT EXISTS bronze.tmdb_raw
     imdb_id String,
     title String,
     release_date Date32,
+    production_companies String,
     budget Int64,
     revenue Int64,
     vote_average Float32,
     vote_count UInt32,
     runtime Int32,
-    genres String
+    genres String,
+    original_language String
 )
 ENGINE = MergeTree
 ORDER BY (imdb_id);

@@ -1,17 +1,12 @@
 {{ config(materialized='table', schema='gold') }}
 
-WITH exploded AS (
-    SELECT
-        id AS movie_id,
-        arrayJoin(splitByChar(',', replaceAll(genres, ' ', ''))) AS genre_name_raw
-    FROM bronze.tmdb_raw
-)
 SELECT
-    row_number() OVER (ORDER BY genre_name_raw) AS genre_id,
-    genre_name_raw                              AS genre_name
+  ROW_NUMBER() OVER (ORDER BY first_genre) AS genre_id,
+  first_genre AS genre_name
 FROM (
-    SELECT DISTINCT genre_name_raw
-    FROM exploded
-    WHERE genre_name_raw != ''
+  SELECT
+    TRIM(SPLIT(genres, ',')[0]) AS first_genre
+  FROM {{ source('bronze', 'tmdb_raw') }}
+  WHERE genres IS NOT NULL
 )
-;
+GROUP BY first_genre;

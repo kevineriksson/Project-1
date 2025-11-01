@@ -1,0 +1,254 @@
+[0m17:31:01.458305 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffaa3ae190>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffaa59afd0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffaa3ac790>]}
+
+
+============================== 17:31:01.465289 | fb79e12e-583a-4f38-a76b-08da90e15754 ==============================
+[0m17:31:01.465289 [info ] [MainThread]: Running with dbt=1.7.0
+[0m17:31:01.465923 [debug] [MainThread]: running dbt with arguments {'write_json': 'True', 'send_anonymous_usage_stats': 'True', 'static_parser': 'True', 'no_print': 'None', 'target_path': 'None', 'log_format': 'default', 'log_cache_events': 'False', 'log_path': '/usr/app/dbt/logs', 'version_check': 'True', 'quiet': 'False', 'invocation_command': 'dbt run --project-dir /usr/app/dbt --profiles-dir /usr/app/dbt --select gold', 'use_colors': 'True', 'use_experimental_parser': 'False', 'debug': 'False', 'warn_error': 'None', 'partial_parse': 'True', 'fail_fast': 'False', 'printer_width': '80', 'introspect': 'True', 'indirect_selection': 'eager', 'cache_selected_only': 'False', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'profiles_dir': '/usr/app/dbt'}
+[0m17:31:01.467597 [error] [MainThread]: Encountered an error:
+Runtime Error
+  Could not find profile named 'movie_clickhouse'
+[0m17:31:01.468883 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffaa3b7310>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffaa3b7390>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffaf9a1150>]}
+[0m17:31:01.469138 [debug] [MainThread]: Flushing usage events
+[0m17:33:13.841907 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffff9829b610>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffff994d7e10>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffff9829a850>]}
+
+
+============================== 17:33:13.844152 | 72d4426f-32fc-4bc2-8435-11d2d0c9aef5 ==============================
+[0m17:33:13.844152 [info ] [MainThread]: Running with dbt=1.7.0
+[0m17:33:13.844502 [debug] [MainThread]: running dbt with arguments {'version_check': 'True', 'send_anonymous_usage_stats': 'True', 'no_print': 'None', 'quiet': 'False', 'log_path': '/usr/app/dbt/logs', 'log_cache_events': 'False', 'partial_parse': 'True', 'cache_selected_only': 'False', 'indirect_selection': 'eager', 'introspect': 'True', 'log_format': 'default', 'debug': 'False', 'write_json': 'True', 'static_parser': 'True', 'use_experimental_parser': 'False', 'fail_fast': 'False', 'printer_width': '80', 'invocation_command': 'dbt run --project-dir /usr/app/dbt --profiles-dir /usr/app/dbt --select gold', 'profiles_dir': '/usr/app/dbt', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'use_colors': 'True', 'target_path': 'None', 'warn_error': 'None'}
+[0m17:33:13.877011 [error] [MainThread]: Encountered an error:
+Runtime Error
+  Credentials in profile "movie_clickhouse", target "dev" invalid: Runtime Error
+        schema: gold 
+        database: default 
+        cluster: None 
+    On Clickhouse, database must be omitted or have the same value as schema.
+[0m17:33:13.877804 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffff980ada10>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffff980ac210>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffff9d6a12d0>]}
+[0m17:33:13.878115 [debug] [MainThread]: Flushing usage events
+[0m17:34:36.020504 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa343fb90>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa2aa2210>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa245ec50>]}
+
+
+============================== 17:34:36.026283 | ab8c2c11-ac0e-4fdf-94e1-cd08bfe13b3a ==============================
+[0m17:34:36.026283 [info ] [MainThread]: Running with dbt=1.7.0
+[0m17:34:36.027144 [debug] [MainThread]: running dbt with arguments {'partial_parse': 'True', 'use_experimental_parser': 'False', 'warn_error': 'None', 'debug': 'False', 'target_path': 'None', 'log_cache_events': 'False', 'printer_width': '80', 'static_parser': 'True', 'introspect': 'True', 'invocation_command': 'dbt run --project-dir /usr/app/dbt --profiles-dir /usr/app/dbt --select gold', 'write_json': 'True', 'profiles_dir': '/usr/app/dbt', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'log_format': 'default', 'version_check': 'True', 'quiet': 'False', 'cache_selected_only': 'False', 'send_anonymous_usage_stats': 'True', 'use_colors': 'True', 'no_print': 'None', 'fail_fast': 'False', 'indirect_selection': 'eager', 'log_path': '/usr/app/dbt/logs'}
+[0m17:34:36.206151 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'project_id', 'label': 'ab8c2c11-ac0e-4fdf-94e1-cd08bfe13b3a', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa25158d0>]}
+[0m17:34:36.285378 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'adapter_info', 'label': 'ab8c2c11-ac0e-4fdf-94e1-cd08bfe13b3a', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa2386150>]}
+[0m17:34:36.287265 [info ] [MainThread]: Registered adapter: clickhouse=1.7.0
+[0m17:34:36.296327 [debug] [MainThread]: checksum: 8434eacd4ffdf0ca3ab22bf0e2d55b45306c9599613e842b959405abc489e606, vars: {}, profile: , target: , version: 1.7.0
+[0m17:34:36.297491 [info ] [MainThread]: Unable to do partial parsing because saved manifest not found. Starting full parse.
+[0m17:34:36.298157 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'partial_parser', 'label': 'ab8c2c11-ac0e-4fdf-94e1-cd08bfe13b3a', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa239e050>]}
+[0m17:34:37.492495 [error] [MainThread]: Encountered an error:
+Compilation Error
+  Model 'model.movie_warehouse.fact_movie' (models/gold/fact_movie.sql) depends on a source named 'bronze.imdb_title_crew_raw' which was not found
+[0m17:34:37.494054 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa245d8d0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa0dd6910>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa0e2e090>]}
+[0m17:34:37.494639 [debug] [MainThread]: Flushing usage events
+[0m18:06:49.274381 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffff881b8b80>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffff86641850>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffff8667a760>]}
+
+
+============================== 18:06:49.289133 | 6a644bed-a7c4-407c-934e-e899cfb3df33 ==============================
+[0m18:06:49.289133 [info ] [MainThread]: Running with dbt=1.8.7
+[0m18:06:49.289483 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'indirect_selection': 'eager', 'log_cache_events': 'False', 'write_json': 'True', 'partial_parse': 'True', 'cache_selected_only': 'False', 'warn_error': 'None', 'fail_fast': 'False', 'debug': 'False', 'log_path': '/opt/airflow/project_root/dbt/logs', 'profiles_dir': '/opt/airflow/project_root/dbt', 'version_check': 'True', 'use_colors': 'True', 'use_experimental_parser': 'False', 'empty': 'False', 'quiet': 'False', 'no_print': 'None', 'log_format': 'default', 'invocation_command': 'dbt run --project-dir /opt/airflow/project_root/dbt --profiles-dir /opt/airflow/project_root/dbt --select gold', 'introspect': 'True', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'target_path': 'None', 'static_parser': 'True', 'send_anonymous_usage_stats': 'True'}
+[0m18:06:49.291814 [info ] [MainThread]: Error importing adapter: No module named 'dbt.adapters.clickhouse'
+[0m18:06:49.292136 [error] [MainThread]: Encountered an error:
+Runtime Error
+  Credentials in profile "movie_clickhouse", target "dev" invalid: Runtime Error
+    Could not find adapter type clickhouse!
+[0m18:06:49.293466 [debug] [MainThread]: Resource report: {"command_name": "run", "command_wall_clock_time": 0.0496455, "process_user_time": 0.649318, "process_kernel_time": 0.105867, "process_mem_max_rss": "179384", "process_in_blocks": "56768", "process_out_blocks": "115", "command_success": false}
+[0m18:06:49.293760 [debug] [MainThread]: Command `dbt run` failed at 18:06:49.293717 after 0.05 seconds
+[0m18:06:49.293957 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffff881b8b80>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffff866cf8e0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffff86632340>]}
+[0m18:06:49.294150 [debug] [MainThread]: Flushing usage events
+[0m18:12:08.764519 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa231aca0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa1a35400>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa0869340>]}
+
+
+============================== 18:12:08.769184 | e4a667aa-3c21-4abd-8838-904ad9b46a23 ==============================
+[0m18:12:08.769184 [info ] [MainThread]: Running with dbt=1.8.7
+[0m18:12:08.769586 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'indirect_selection': 'eager', 'write_json': 'True', 'log_cache_events': 'False', 'partial_parse': 'True', 'cache_selected_only': 'False', 'warn_error': 'None', 'debug': 'False', 'version_check': 'True', 'log_path': '/opt/airflow/project_root/dbt/logs', 'fail_fast': 'False', 'profiles_dir': '/opt/airflow/project_root/dbt', 'use_colors': 'True', 'use_experimental_parser': 'False', 'no_print': 'None', 'quiet': 'False', 'empty': 'False', 'log_format': 'default', 'static_parser': 'True', 'introspect': 'True', 'invocation_command': 'dbt run --project-dir /opt/airflow/project_root/dbt --profiles-dir /opt/airflow/project_root/dbt --select gold', 'target_path': 'None', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'send_anonymous_usage_stats': 'True'}
+[0m18:12:08.776475 [error] [MainThread]: Encountered an error:
+'type' object is not subscriptable
+[0m18:12:08.778040 [error] [MainThread]: Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/cli/requires.py", line 138, in wrapper
+    result, success = func(*args, **kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/cli/requires.py", line 101, in wrapper
+    return func(*args, **kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/cli/requires.py", line 215, in wrapper
+    profile = load_profile(flags.PROJECT_DIR, flags.VARS, flags.PROFILE, flags.TARGET, threads)
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/config/runtime.py", line 71, in load_profile
+    profile = Profile.render(
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/config/profile.py", line 403, in render
+    return cls.from_raw_profiles(
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/config/profile.py", line 369, in from_raw_profiles
+    return cls.from_raw_profile_info(
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/config/profile.py", line 325, in from_raw_profile_info
+    credentials: Credentials = cls._credentials_from_profile(
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/config/profile.py", line 149, in _credentials_from_profile
+    cls = load_plugin(typename)
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/adapters/factory.py", line 239, in load_plugin
+    return FACTORY.load_plugin(name)
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/adapters/factory.py", line 68, in load_plugin
+    mod: Any = import_module("." + name, "dbt.adapters")
+  File "/usr/local/lib/python3.8/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1014, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 991, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 975, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 671, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 843, in exec_module
+  File "<frozen importlib._bootstrap>", line 219, in _call_with_frames_removed
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/adapters/clickhouse/__init__.py", line 4, in <module>
+    from dbt.adapters.clickhouse.connections import ClickHouseConnectionManager  # noqa
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/adapters/clickhouse/connections.py", line 10, in <module>
+    from dbt.adapters.clickhouse.dbclient import ChRetryableException, get_db_client
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/adapters/clickhouse/dbclient.py", line 9, in <module>
+    from dbt.adapters.clickhouse.credentials import ClickHouseCredentials
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/adapters/clickhouse/credentials.py", line 9, in <module>
+    class ClickHouseCredentials(Credentials):
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/adapters/clickhouse/credentials.py", line 38, in ClickHouseCredentials
+    tcp_keepalive: Union[bool, tuple[int, int, int], list[int]] = False
+TypeError: 'type' object is not subscriptable
+
+[0m18:12:08.778868 [debug] [MainThread]: Resource report: {"command_name": "run", "command_wall_clock_time": 0.040379085, "process_user_time": 0.661739, "process_kernel_time": 0.100699, "process_mem_max_rss": "179244", "process_in_blocks": "59120", "process_out_blocks": "9", "command_success": false}
+[0m18:12:08.779185 [debug] [MainThread]: Command `dbt run` failed at 18:12:08.779131 after 0.04 seconds
+[0m18:12:08.779391 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa231aca0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa08a75b0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa06f39a0>]}
+[0m18:12:08.779585 [debug] [MainThread]: Flushing usage events
+[0m18:20:03.186999 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa87c6c70>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa7287190>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa6bb23a0>]}
+
+
+============================== 18:20:03.203329 | c1d3aec8-6763-4e06-b253-f559aeecea84 ==============================
+[0m18:20:03.203329 [info ] [MainThread]: Running with dbt=1.8.7
+[0m18:20:03.203705 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'indirect_selection': 'eager', 'log_cache_events': 'False', 'write_json': 'True', 'partial_parse': 'True', 'cache_selected_only': 'False', 'warn_error': 'None', 'debug': 'False', 'version_check': 'True', 'log_path': '/opt/airflow/project_root/dbt/logs', 'profiles_dir': '/opt/airflow/project_root/dbt', 'fail_fast': 'False', 'use_colors': 'True', 'use_experimental_parser': 'False', 'empty': 'False', 'quiet': 'False', 'no_print': 'None', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'static_parser': 'True', 'introspect': 'True', 'invocation_command': 'dbt run --project-dir /opt/airflow/project_root/dbt --profiles-dir /opt/airflow/project_root/dbt --select gold', 'target_path': 'None', 'log_format': 'default', 'send_anonymous_usage_stats': 'True'}
+[0m18:20:03.206185 [info ] [MainThread]: Error importing adapter: No module named 'dbt.adapters.clickhouse'
+[0m18:20:03.206499 [error] [MainThread]: Encountered an error:
+Runtime Error
+  Credentials in profile "movie_clickhouse", target "dev" invalid: Runtime Error
+    Could not find adapter type clickhouse!
+[0m18:20:03.207278 [debug] [MainThread]: Resource report: {"command_name": "run", "command_wall_clock_time": 0.0494365, "process_user_time": 0.728931, "process_kernel_time": 0.140793, "process_mem_max_rss": "179204", "process_in_blocks": "61632", "process_out_blocks": "2779", "command_success": false}
+[0m18:20:03.207591 [debug] [MainThread]: Command `dbt run` failed at 18:20:03.207535 after 0.05 seconds
+[0m18:20:03.207815 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa87c6c70>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa6c1cc70>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa6c1c400>]}
+[0m18:20:03.208012 [debug] [MainThread]: Flushing usage events
+[0m18:34:31.226630 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffff7f7e7ac0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffff7f0e5f10>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffff7dcaa700>]}
+
+
+============================== 18:34:31.232405 | c7ae6c79-eb4f-4a1d-9986-49ae277e2ae4 ==============================
+[0m18:34:31.232405 [info ] [MainThread]: Running with dbt=1.8.7
+[0m18:34:31.233239 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'indirect_selection': 'eager', 'write_json': 'True', 'log_cache_events': 'False', 'partial_parse': 'True', 'cache_selected_only': 'False', 'profiles_dir': '/opt/airflow/project_root/dbt', 'version_check': 'True', 'warn_error': 'None', 'log_path': '/opt/airflow/project_root/dbt/logs', 'debug': 'False', 'fail_fast': 'False', 'use_colors': 'True', 'use_experimental_parser': 'False', 'no_print': 'None', 'quiet': 'False', 'empty': 'False', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'invocation_command': 'dbt run --project-dir /opt/airflow/project_root/dbt --profiles-dir /opt/airflow/project_root/dbt --select gold', 'log_format': 'default', 'static_parser': 'True', 'target_path': 'None', 'introspect': 'True', 'send_anonymous_usage_stats': 'True'}
+[0m18:34:31.242318 [info ] [MainThread]: Error importing adapter: No module named 'dbt.adapters.clickhouse'
+[0m18:34:31.243302 [error] [MainThread]: Encountered an error:
+Runtime Error
+  Credentials in profile "movie_clickhouse", target "dev" invalid: Runtime Error
+    Could not find adapter type clickhouse!
+[0m18:34:31.245142 [debug] [MainThread]: Resource report: {"command_name": "run", "command_wall_clock_time": 0.049812794, "process_user_time": 0.747644, "process_kernel_time": 0.1897, "process_mem_max_rss": "179436", "process_in_blocks": "55824", "process_out_blocks": "3", "command_success": false}
+[0m18:34:31.245775 [debug] [MainThread]: Command `dbt run` failed at 18:34:31.245642 after 0.05 seconds
+[0m18:34:31.246057 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffff7f7e7ac0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffff7dccda90>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffff7dccda00>]}
+[0m18:34:31.246373 [debug] [MainThread]: Flushing usage events
+[0m18:36:31.962908 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffb3a33970>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffb412b3a0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffb4a78910>]}
+
+
+============================== 18:36:31.973053 | 43a5607a-f377-4ac6-b4c3-572df62380c5 ==============================
+[0m18:36:31.973053 [info ] [MainThread]: Running with dbt=1.8.7
+[0m18:36:31.974150 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'indirect_selection': 'eager', 'log_cache_events': 'False', 'write_json': 'True', 'partial_parse': 'True', 'cache_selected_only': 'False', 'warn_error': 'None', 'fail_fast': 'False', 'version_check': 'True', 'log_path': '/opt/airflow/project_root/dbt/logs', 'debug': 'False', 'profiles_dir': '/opt/airflow/project_root/dbt', 'use_colors': 'True', 'use_experimental_parser': 'False', 'no_print': 'None', 'quiet': 'False', 'empty': 'False', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'introspect': 'True', 'invocation_command': 'dbt run --project-dir /opt/airflow/project_root/dbt --profiles-dir /opt/airflow/project_root/dbt --select gold', 'log_format': 'default', 'target_path': 'None', 'static_parser': 'True', 'send_anonymous_usage_stats': 'True'}
+[0m18:36:31.984769 [info ] [MainThread]: Error importing adapter: No module named 'dbt.adapters.clickhouse'
+[0m18:36:31.986014 [error] [MainThread]: Encountered an error:
+Runtime Error
+  Credentials in profile "movie_clickhouse", target "dev" invalid: Runtime Error
+    Could not find adapter type clickhouse!
+[0m18:36:31.988430 [debug] [MainThread]: Resource report: {"command_name": "run", "command_wall_clock_time": 0.100820914, "process_user_time": 2.539708, "process_kernel_time": 0.653315, "process_mem_max_rss": "179224", "process_in_blocks": "41536", "process_out_blocks": "3", "command_success": false}
+[0m18:36:31.989490 [debug] [MainThread]: Command `dbt run` failed at 18:36:31.989238 after 0.10 seconds
+[0m18:36:31.991243 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffb3a33970>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffb1f1de50>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffb1f1d850>]}
+[0m18:36:31.992757 [debug] [MainThread]: Flushing usage events
+[0m18:40:39.916189 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa5dc9af0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa4ebac70>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa5570040>]}
+
+
+============================== 18:40:39.920009 | abd6f7cd-34f2-444f-bd31-7b550aef8295 ==============================
+[0m18:40:39.920009 [info ] [MainThread]: Running with dbt=1.8.7
+[0m18:40:39.920332 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'indirect_selection': 'eager', 'log_cache_events': 'False', 'write_json': 'True', 'partial_parse': 'True', 'cache_selected_only': 'False', 'profiles_dir': '/opt/airflow/project_root/dbt', 'debug': 'False', 'fail_fast': 'False', 'log_path': '/opt/airflow/project_root/dbt/logs', 'warn_error': 'None', 'version_check': 'True', 'use_colors': 'True', 'use_experimental_parser': 'False', 'no_print': 'None', 'quiet': 'False', 'empty': 'False', 'log_format': 'default', 'invocation_command': 'dbt run --project-dir /opt/airflow/project_root/dbt --profiles-dir /opt/airflow/project_root/dbt --select gold', 'static_parser': 'True', 'introspect': 'True', 'target_path': 'None', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'send_anonymous_usage_stats': 'True'}
+[0m18:40:39.922463 [info ] [MainThread]: Error importing adapter: No module named 'dbt.adapters.clickhouse'
+[0m18:40:39.922765 [error] [MainThread]: Encountered an error:
+Runtime Error
+  Credentials in profile "movie_clickhouse", target "dev" invalid: Runtime Error
+    Could not find adapter type clickhouse!
+[0m18:40:39.923456 [debug] [MainThread]: Resource report: {"command_name": "run", "command_wall_clock_time": 0.032612376, "process_user_time": 0.660812, "process_kernel_time": 0.141026, "process_mem_max_rss": "179360", "process_in_blocks": "59856", "process_out_blocks": "3", "command_success": false}
+[0m18:40:39.923735 [debug] [MainThread]: Command `dbt run` failed at 18:40:39.923681 after 0.03 seconds
+[0m18:40:39.923925 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa5dc9af0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa42ad9a0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffa42adb20>]}
+[0m18:40:39.924117 [debug] [MainThread]: Flushing usage events
+[0m18:47:14.175663 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffadbacaf0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffacc9cc70>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffad351040>]}
+
+
+============================== 18:47:14.179827 | 4acad39a-24c6-43ac-b291-02322f58ee62 ==============================
+[0m18:47:14.179827 [info ] [MainThread]: Running with dbt=1.8.7
+[0m18:47:14.180178 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'indirect_selection': 'eager', 'write_json': 'True', 'log_cache_events': 'False', 'partial_parse': 'True', 'cache_selected_only': 'False', 'profiles_dir': '/opt/airflow/project_root/dbt', 'fail_fast': 'False', 'version_check': 'True', 'log_path': '/opt/airflow/project_root/dbt/logs', 'debug': 'False', 'warn_error': 'None', 'use_colors': 'True', 'use_experimental_parser': 'False', 'no_print': 'None', 'quiet': 'False', 'empty': 'False', 'log_format': 'default', 'introspect': 'True', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'static_parser': 'True', 'target_path': 'None', 'invocation_command': 'dbt run --project-dir /opt/airflow/project_root/dbt --profiles-dir /opt/airflow/project_root/dbt --select gold', 'send_anonymous_usage_stats': 'True'}
+[0m18:47:14.185992 [error] [MainThread]: Encountered an error:
+'type' object is not subscriptable
+[0m18:47:14.187973 [error] [MainThread]: Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/cli/requires.py", line 138, in wrapper
+    result, success = func(*args, **kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/cli/requires.py", line 101, in wrapper
+    return func(*args, **kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/cli/requires.py", line 215, in wrapper
+    profile = load_profile(flags.PROJECT_DIR, flags.VARS, flags.PROFILE, flags.TARGET, threads)
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/config/runtime.py", line 71, in load_profile
+    profile = Profile.render(
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/config/profile.py", line 403, in render
+    return cls.from_raw_profiles(
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/config/profile.py", line 369, in from_raw_profiles
+    return cls.from_raw_profile_info(
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/config/profile.py", line 325, in from_raw_profile_info
+    credentials: Credentials = cls._credentials_from_profile(
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/config/profile.py", line 149, in _credentials_from_profile
+    cls = load_plugin(typename)
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/adapters/factory.py", line 239, in load_plugin
+    return FACTORY.load_plugin(name)
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/adapters/factory.py", line 68, in load_plugin
+    mod: Any = import_module("." + name, "dbt.adapters")
+  File "/usr/local/lib/python3.8/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1014, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 991, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 975, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 671, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 843, in exec_module
+  File "<frozen importlib._bootstrap>", line 219, in _call_with_frames_removed
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/adapters/clickhouse/__init__.py", line 4, in <module>
+    from dbt.adapters.clickhouse.connections import ClickHouseConnectionManager  # noqa
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/adapters/clickhouse/connections.py", line 10, in <module>
+    from dbt.adapters.clickhouse.dbclient import ChRetryableException, get_db_client
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/adapters/clickhouse/dbclient.py", line 9, in <module>
+    from dbt.adapters.clickhouse.credentials import ClickHouseCredentials
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/adapters/clickhouse/credentials.py", line 9, in <module>
+    class ClickHouseCredentials(Credentials):
+  File "/home/airflow/.local/lib/python3.8/site-packages/dbt/adapters/clickhouse/credentials.py", line 38, in ClickHouseCredentials
+    tcp_keepalive: Union[bool, tuple[int, int, int], list[int]] = False
+TypeError: 'type' object is not subscriptable
+
+[0m18:47:14.188864 [debug] [MainThread]: Resource report: {"command_name": "run", "command_wall_clock_time": 0.040103126, "process_user_time": 0.685499, "process_kernel_time": 0.109842, "process_mem_max_rss": "179308", "process_in_blocks": "61440", "process_out_blocks": "9", "command_success": false}
+[0m18:47:14.189197 [debug] [MainThread]: Command `dbt run` failed at 18:47:14.189134 after 0.04 seconds
+[0m18:47:14.189436 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffadbacaf0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffac018dc0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffabef0970>]}
+[0m18:47:14.189651 [debug] [MainThread]: Flushing usage events
+[0m18:53:22.279773 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffb6a97c40>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffb5af7970>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffb4e85bb0>]}
+
+
+============================== 18:53:22.315091 | af98d37e-31dd-4ece-b737-431980c21b74 ==============================
+[0m18:53:22.315091 [info ] [MainThread]: Running with dbt=1.8.7
+[0m18:53:22.316078 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'indirect_selection': 'eager', 'write_json': 'True', 'log_cache_events': 'False', 'partial_parse': 'True', 'cache_selected_only': 'False', 'profiles_dir': '/opt/airflow/project_root/dbt', 'version_check': 'True', 'debug': 'False', 'log_path': '/opt/airflow/project_root/dbt/logs', 'warn_error': 'None', 'fail_fast': 'False', 'use_colors': 'True', 'use_experimental_parser': 'False', 'no_print': 'None', 'quiet': 'False', 'empty': 'False', 'log_format': 'default', 'static_parser': 'True', 'introspect': 'True', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'target_path': 'None', 'invocation_command': 'dbt run --project-dir /opt/airflow/project_root/dbt --profiles-dir /opt/airflow/project_root/dbt --select gold', 'send_anonymous_usage_stats': 'True'}
+[0m18:53:22.319884 [info ] [MainThread]: Error importing adapter: No module named 'dbt.adapters.clickhouse'
+[0m18:53:22.320363 [error] [MainThread]: Encountered an error:
+Runtime Error
+  Credentials in profile "movie_clickhouse", target "dev" invalid: Runtime Error
+    Could not find adapter type clickhouse!
+[0m18:53:22.321878 [debug] [MainThread]: Resource report: {"command_name": "run", "command_wall_clock_time": 0.07787687, "process_user_time": 0.813776, "process_kernel_time": 0.133089, "process_mem_max_rss": "179380", "process_in_blocks": "62656", "process_out_blocks": "2779", "command_success": false}
+[0m18:53:22.322567 [debug] [MainThread]: Command `dbt run` failed at 18:53:22.322471 after 0.08 seconds
+[0m18:53:22.323447 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffb6a97c40>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffb4eedc70>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffffb4eedac0>]}
+[0m18:53:22.324459 [debug] [MainThread]: Flushing usage events
+[0m19:29:08.644013 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffff9ea19a60>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffff9f05cf70>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffff9da772e0>]}
+
+
+============================== 19:29:08.659769 | 2f872c3d-d4db-48be-b727-3b6c69b22187 ==============================
+[0m19:29:08.659769 [info ] [MainThread]: Running with dbt=1.8.7
+[0m19:29:08.660181 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'indirect_selection': 'eager', 'write_json': 'True', 'log_cache_events': 'False', 'partial_parse': 'True', 'cache_selected_only': 'False', 'warn_error': 'None', 'debug': 'False', 'profiles_dir': '/opt/airflow/project_root/dbt', 'log_path': '/opt/airflow/project_root/dbt/logs', 'version_check': 'True', 'fail_fast': 'False', 'use_colors': 'True', 'use_experimental_parser': 'False', 'empty': 'False', 'quiet': 'False', 'no_print': 'None', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'static_parser': 'True', 'invocation_command': 'dbt run --project-dir /opt/airflow/project_root/dbt --profiles-dir /opt/airflow/project_root/dbt --select gold', 'log_format': 'default', 'target_path': 'None', 'introspect': 'True', 'send_anonymous_usage_stats': 'True'}
+[0m19:29:08.662487 [info ] [MainThread]: Error importing adapter: No module named 'dbt.adapters.clickhouse'
+[0m19:29:08.662786 [error] [MainThread]: Encountered an error:
+Runtime Error
+  Credentials in profile "movie_clickhouse", target "dev" invalid: Runtime Error
+    Could not find adapter type clickhouse!
+[0m19:29:08.663522 [debug] [MainThread]: Resource report: {"command_name": "run", "command_wall_clock_time": 0.050519418, "process_user_time": 0.784416, "process_kernel_time": 0.16088, "process_mem_max_rss": "179176", "process_in_blocks": "59136", "process_out_blocks": "2779", "command_success": false}
+[0m19:29:08.663829 [debug] [MainThread]: Command `dbt run` failed at 19:29:08.663782 after 0.05 seconds
+[0m19:29:08.664700 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffff9ea19a60>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffff9cec6790>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0xffff9ce6ddf0>]}
+[0m19:29:08.664920 [debug] [MainThread]: Flushing usage events

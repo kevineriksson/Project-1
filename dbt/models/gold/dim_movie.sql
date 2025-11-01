@@ -1,13 +1,16 @@
-{{ config(materialized='table', schema='gold') }}
+{{ config(
+    materialized = 'table',
+    schema = 'gold',
+    engine = 'MergeTree()',
+    order_by = 'movie_id'
+) }}
 
 SELECT
-    tmdb.id            AS movie_id,
-    b.tconst           AS imdb_id,
-    tmdb.title         AS movie_title,
-    tmdb.runtime       AS movie_runtime,
-    tmdb.popularity    AS movie_popularity
-FROM bronze.tmdb_raw tmdb
-LEFT JOIN bronze.imdb_title_basics_raw b
-    ON b.primaryTitle = tmdb.title
-    AND toInt32OrZero(b.startYear) = toYear(tmdb.release_date)
-;
+    row_number() OVER (ORDER BY title) AS movie_id,
+    imdb_id,
+    title AS movie_title,
+    release_date,
+    runtime AS movie_runtime,
+    original_language AS language
+FROM {{ source('bronze', 'tmdb_raw') }}
+WHERE title IS NOT NULL;
