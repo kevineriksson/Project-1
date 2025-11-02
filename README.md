@@ -123,30 +123,30 @@ clickhouse-client --query "SHOW TABLES FROM _gold"
 
   ---
 
-  ### 5. Airflow DAGs
-  <img width="1892" height="605" alt="DAG_1" src="https://github.com/user-attachments/assets/13dfdce1-86f3-4823-8309-6d6a39bde50f" />
+### 5. Airflow DAGs
+<img width="1892" height="605" alt="DAG_1" src="https://github.com/user-attachments/assets/13dfdce1-86f3-4823-8309-6d6a39bde50f" />
   
-  <img width="1896" height="895" alt="DAG_2" src="https://github.com/user-attachments/assets/a0e9750e-6d54-47f5-88a2-2f7fe12e7bf5" />
+<img width="1896" height="895" alt="DAG_2" src="https://github.com/user-attachments/assets/a0e9750e-6d54-47f5-88a2-2f7fe12e7bf5" />
 
   ---
 
-  ### 6. Example query results
-  * Which genres have the highest average ratings?
-  <img width="1650" height="583" alt="Q1" src="https://github.com/user-attachments/assets/f980fc71-f836-453a-90ed-7e6cf2d0a656" />
+### 6. Example query results
+* Which genres have the highest average ratings?
+<img width="1650" height="583" alt="Q1" src="https://github.com/user-attachments/assets/f980fc71-f836-453a-90ed-7e6cf2d0a656" />
 
-  * Which directors consistently produce high-rated movies and high revenue?
-  <img width="1650" height="668" alt="Q2" src="https://github.com/user-attachments/assets/f4de6c6b-7693-4502-bf8e-3a9570741e75" />
+* Which directors consistently produce high-rated movies and high revenue?
+<img width="1650" height="668" alt="Q2" src="https://github.com/user-attachments/assets/f4de6c6b-7693-4502-bf8e-3a9570741e75" />
 
-  * How does average rating correlate with box-office revenue across release years?
-  <img width="1654" height="672" alt="Q3" src="https://github.com/user-attachments/assets/6aa62e69-b5b6-4f9a-a206-c7920e5ccfd2" />
+* How does average rating correlate with box-office revenue across release years?
+<img width="1654" height="672" alt="Q3" src="https://github.com/user-attachments/assets/6aa62e69-b5b6-4f9a-a206-c7920e5ccfd2" />
 
-  * What are the top 10 movies by revenue per genre for a given year?
+* What are the top 10 movies by revenue per genre for a given year?
     
-  <img width="1642" height="822" alt="Q4" src="https://github.com/user-attachments/assets/e71a0fac-50f2-4dfb-b1ea-b35191ae7b47" />
+<img width="1642" height="822" alt="Q4" src="https://github.com/user-attachments/assets/e71a0fac-50f2-4dfb-b1ea-b35191ae7b47" />
 
-  * How does the runtime affect changes to the overall box-office revenue?
+* How does the runtime affect changes to the overall box-office revenue?
     
-  <img width="1650" height="674" alt="Q5" src="https://github.com/user-attachments/assets/0217843b-5ae4-44c4-9a5e-db00b74a4883" />
+<img width="1650" height="674" alt="Q5" src="https://github.com/user-attachments/assets/0217843b-5ae4-44c4-9a5e-db00b74a4883" />
 
 
   
