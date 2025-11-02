@@ -141,12 +141,13 @@ clickhouse-client --query "SHOW TABLES FROM _gold"
 <img width="1654" height="672" alt="Q3" src="https://github.com/user-attachments/assets/6aa62e69-b5b6-4f9a-a206-c7920e5ccfd2" />
 
 * What are the top 10 movies by revenue per genre for a given year?
-    
-<img width="1642" height="822" alt="Q4" src="https://github.com/user-attachments/assets/e71a0fac-50f2-4dfb-b1ea-b35191ae7b47" />
+
+<img width="1833" height="403" alt="Q4" src="https://github.com/user-attachments/assets/5e3ccf5e-04a8-4ddc-9753-8412ea2d6e51" />
 
 * How does the runtime affect changes to the overall box-office revenue?
     
 <img width="1650" height="674" alt="Q5" src="https://github.com/user-attachments/assets/0217843b-5ae4-44c4-9a5e-db00b74a4883" />
+
 
 
   
