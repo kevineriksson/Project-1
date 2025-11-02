@@ -1,0 +1,17 @@
+version: 2
+
+sources:
+  - name: bronze
+    database: bronze
+    tables:
+      - name: tmdb_raw
+        description: "Raw TMDB movie data"
+        
+      - name: imdb_title_basics_raw
+        description: "IMDB title basics data"
+        
+      - name: imdb_title_crew_raw
+        description: "IMDB crew data"
+        
+      - name: imdb_name_basics_raw
+        description: "IMDB name/person data"

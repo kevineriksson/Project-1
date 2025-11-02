@@ -1,27 +1,31 @@
 {{ config(
-    materialized = 'table',
-    schema = 'gold',
-    engine = 'MergeTree()',
-    order_by = 'fact_id'
+    materialized='table',
+    schema='gold',
+    engine='MergeTree()',
+    order_by='fact_id'
 ) }}
 
-WITH latest_tmdb AS (
-    SELECT
-        *,
-        row_number() OVER (PARTITION BY id ORDER BY ingestion_date DESC) AS rn
+WITH filtered_tmdb AS (
+    SELECT 
+        imdb_id,
+        title,
+        release_date,
+        production_companies,
+        budget,
+        revenue,
+        vote_average,
+        vote_count,
+        runtime,
+        genres,
+        original_language,
+        (vote_average * log(1 + vote_count)) AS movie_popularity
     FROM {{ source('bronze', 'tmdb_raw') }}
-),
-
-filtered_tmdb AS (
-    SELECT *
-    FROM latest_tmdb
-    WHERE rn = 1
 ),
 
 -- First genre
 first_genre AS (
     SELECT
-        id AS movie_id,
+        imdb_id AS movie_id,
         trim(splitByChar(',', genres)[1]) AS genre_name
     FROM filtered_tmdb
 ),
@@ -29,9 +33,9 @@ first_genre AS (
 -- First director
 first_director AS (
     SELECT
-        t.id AS movie_id,
+        t.imdb_id AS movie_id,
         trim(splitByChar(',', c.directors)[1]) AS director_id
-    FROM {{ source('bronze', 'tmdb_raw') }} t
+    FROM filtered_tmdb t
     LEFT JOIN {{ source('bronze', 'imdb_title_crew_raw') }} c
         ON t.imdb_id = c.tconst
 ),
@@ -39,7 +43,7 @@ first_director AS (
 -- Join to dim_production to get production_id
 movie_production AS (
     SELECT
-        t.id AS movie_id,
+        t.imdb_id AS movie_id,
         p.production_id
     FROM filtered_tmdb t
     LEFT JOIN {{ ref('dim_production') }} p
@@ -58,7 +62,7 @@ movie_genre AS (
 
 base AS (
     SELECT
-        t.id                                      AS movie_id,
+        t.imdb_id                                 AS movie_id,
         d.director_id,
         mg.genre_id,
         mp.production_id,
@@ -67,12 +71,12 @@ base AS (
         t.vote_count,
         t.revenue,
         t.budget,
-        t.popularity                              AS movie_popularity,
+        t.movie_popularity,
         toYear(t.release_date)                    AS release_year
     FROM filtered_tmdb t
-    LEFT JOIN movie_genre mg       ON mg.movie_id = t.id
-    LEFT JOIN first_director d     ON d.movie_id = t.id
-    LEFT JOIN movie_production mp  ON mp.movie_id = t.id
+    LEFT JOIN movie_genre mg       ON mg.movie_id = t.imdb_id
+    LEFT JOIN first_director d     ON d.movie_id = t.imdb_id
+    LEFT JOIN movie_production mp  ON mp.movie_id = t.imdb_id
     LEFT JOIN {{ ref('dim_release_date') }} dr
         ON dr.full_date = t.release_date
 ),
@@ -87,7 +91,7 @@ metrics AS (
 )
 
 SELECT
-    row_number() OVER (ORDER BY movie_id) AS fact_id,
+    row_number() OVER (ORDER BY movie_id, date_id, director_id, genre_id) AS fact_id,
     movie_id,
     director_id,
     genre_id,
@@ -101,4 +105,4 @@ SELECT
     revenue_growth,
     popularity_change,
     vote_avg_change
-FROM metrics;
+FROM metrics

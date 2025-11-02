@@ -11,7 +11,9 @@ clean-targets: ["target", "dbt_packages"]
 models:
   movie_warehouse:
     +materialized: table
+    +on_schema_change: append_new_columns
     bronze:
       +schema: bronze
     gold:
       +schema: gold
+      +on_schema_change: append_new_columns 

@@ -28,7 +28,6 @@ services:
       timeout: 5s
       retries: 5
     restart: always
-
   # ----------------------------------------
   # 2. dbt (Data Build Tool)
   # ----------------------------------------

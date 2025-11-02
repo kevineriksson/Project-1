@@ -108,7 +108,7 @@ def load_clickhouse_bronze(**context):
 
     # Keep only relevant fields for the analytical model
     expected_cols = [
-        "imdb_id", "title", "release_date",
+        "imdb_id", "title", "release_date","production_companies",
         "budget", "revenue", "vote_average",
         "vote_count", "runtime", "genres"
     ]
@@ -124,7 +124,7 @@ def load_clickhouse_bronze(**context):
     tmdb_df = tmdb_df.dropna(subset=["imdb_id"])
 
     # Fill NaNs for text columns and cast to string
-    for col in ["imdb_id", "title", "genres"]:
+    for col in ["imdb_id", "title", "genres", "production_companies"]:
         if col in tmdb_df.columns:
             tmdb_df[col] = tmdb_df[col].fillna("").astype(str)
 
@@ -213,8 +213,27 @@ def load_clickhouse_bronze(**context):
     print("All bronze tables successfully loaded.")
 
 
-# --- TASK 6: RUN DBT TRANSFORMATIONS ---
 def run_dbt_gold(**context):
+    # Drop existing tables before running dbt
+    client = clickhouse_connect.get_client(host=CH_HOST, username=CH_USER, password=CH_PASS)
+    
+    tables_to_drop = [
+        "dim_director",
+        "dim_genre", 
+        "dim_movie",
+        "dim_production",
+        "dim_release_date",
+        "fact_movie"  # Add this line
+    ]
+    
+    for table in tables_to_drop:
+        try:
+            client.command(f"DROP TABLE IF EXISTS gold_gold.{table} SYNC")
+            print(f"Dropped table gold_gold.{table}")
+        except Exception as e:
+            print(f"Could not drop {table}: {e}")
+    
+    # Now run dbt
     cmd = [
         "dbt", "run",
         "--project-dir", "/opt/airflow/project_root/dbt",
@@ -227,14 +246,11 @@ def run_dbt_gold(**context):
     return result.stdout
 
 
-
-
-# --- TASK 7: RUN DBT TESTS ---
 def run_dbt_tests(**context):
     cmd = [
         "dbt", "test",
-        "--project-dir", "/opt/dbt",
-        "--profiles-dir", "/opt/dbt",
+        "--project-dir", "/opt/airflow/project_root/dbt",
+        "--profiles-dir", "/opt/airflow/project_root/dbt",
         "--select", "gold"
     ]
     result = subprocess.run(cmd, capture_output=True, text=True)

@@ -7,9 +7,8 @@
 SELECT 
     g.genre_name,
     ROUND(AVG(f.vote_avg), 2) AS avg_rating
-FROM Fact_Movie f
-JOIN Movie_Genre mg ON f.movie_ID = mg.movie_ID
-JOIN Dim_Genre g ON mg.genre_ID = g.genre_ID
+FROM gold_gold.fact_movie f
+JOIN gold_gold.dim_genre g ON f.genre_id = g.genre_id
 GROUP BY g.genre_name
 ORDER BY avg_rating DESC;
 

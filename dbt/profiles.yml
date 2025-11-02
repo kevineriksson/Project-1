@@ -5,9 +5,11 @@ movie_clickhouse:
       type: clickhouse
       schema: gold
       host: clickhouse-server
-      port: 8123
-      user: analytics
-      password: analytics_pw
-      secure: False
-      verify: False
-      threads: 4
+      port: 8123              # Native protocol port
+      user: dbt_user
+      password: dbt_password
+      secure: false
+      verify: false
+      driver: http
+      connect_timeout: 10
+      send_receive_timeout: 300
