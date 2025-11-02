@@ -3,13 +3,13 @@ movie_clickhouse:
   outputs:
     dev:
       type: clickhouse
-      schema: gold
       host: clickhouse-server
-      port: 8123              # Native protocol port
+      port: 8123
       user: dbt_user
       password: dbt_password
+      schema: ""
+      driver: http
       secure: false
       verify: false
-      driver: http
       connect_timeout: 10
       send_receive_timeout: 300

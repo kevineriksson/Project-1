@@ -1,34 +1,39 @@
-# --- DEPENDENCY AND BUILD FILES ---
+# --- SYSTEM & EDITOR FILES ---
 .DS_Store
+Thumbs.db
+
+# --- PYTHON CACHE & ENVIRONMENTS ---
 __pycache__/
 *.pyc
+*.pyo
 *.egg-info/
 .venv/
-/venv/
+venv/
 .pytest_cache/
-.tsv
-.csv
-.zip
+.mypy_cache/
 
-# --- DOCKER DATA VOLUMES (CRITICAL) ---
-# These folders contain runtime data, configuration, or temporary files
-# and should NEVER be committed to Git.
+# --- ENVIRONMENT FILES ---
+.env
+.env.*
 
-# ClickHouse Data (Database storage)
-/clickhouse_data/
+# --- DATA & TEMPORARY FILES ---
+*.tsv
+*.csv
+*.zip
 
-# PostgreSQL Data (Airflow Metadata Database storage)
-/pgdata_airflow/
+# --- DOCKER DATA VOLUMES ---
+clickhouse_data/
+pgdata_airflow/
 
-# Airflow Runtime Logs and Metadata
-/airflow/logs/
-/airflow/dags/raw/ # Raw downloaded data (can be large)
-/airflow/dags/__pycache__/
-/airflow/dags/.mypy_cache/
+# --- AIRFLOW DIRECTORIES ---
+airflow/logs/
+airflow/dags/raw/
+airflow/dags/__pycache__/
 
-# --- DBT FILES ---
-# dbt artifacts and compiled models
-/dbt/target/
-/dbt/dbt_packages/airflow/dags/raw/*
-clickhouse_data/*
-pgdata_airflow/*
+# --- DBT DIRECTORIES ---
+dbt/target/
+dbt/dbt_packages/
+
+# --- IDE / PROJECT SETTINGS ---
+.vscode/
+.idea/

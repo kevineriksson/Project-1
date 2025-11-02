@@ -28,21 +28,21 @@ def run_dbt_gold(**context):
     client = clickhouse_connect.get_client(host=CH_HOST, username=CH_USER, password=CH_PASS)
     
     tables_to_drop = [
-        "dim_director",
-        "dim_genre", 
-        "dim_movie",
-        "dim_production",
-        "dim_date",
-        "fact_movie"  # Add this line
-    ]
-    
+    "dim_director",
+    "dim_genre",
+    "dim_movie",
+    "dim_production",
+    "dim_date",
+    "fact_movie"
+]
+
     for table in tables_to_drop:
         try:
-            client.command(f"DROP TABLE IF EXISTS gold_gold.{table} SYNC")
-            print(f"Dropped table gold_gold.{table}")
+            client.command(f"DROP TABLE IF EXISTS gold.{table} SYNC")  # remove double gold
+            print(f"Dropped table gold.{table}")
         except Exception as e:
             print(f"Could not drop {table}: {e}")
-    
+        
     # Now run dbt
     cmd = [
         "dbt", "run",

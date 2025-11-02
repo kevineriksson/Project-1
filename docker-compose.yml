@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   # ----------------------------------------
   # 1. ClickHouse Data Warehouse
@@ -7,10 +5,10 @@ services:
   clickhouse-server:
     image: clickhouse/clickhouse-server
     container_name: clickhouse-server
+    env_file:
+      - .env
     environment:
-      CLICKHOUSE_USER: dbt_user
-      CLICKHOUSE_PASSWORD: dbt_password
-      CLICKHOUSE_DB: data_warehouse
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB}
     ports:
       - "8123:8123"
       - "9000:9000"
@@ -28,6 +26,7 @@ services:
       timeout: 5s
       retries: 5
     restart: always
+
   # ----------------------------------------
   # 2. dbt (Data Build Tool)
   # ----------------------------------------
@@ -37,6 +36,8 @@ services:
       dockerfile: dbt/Dockerfile
     image: my_project_dbt:latest
     container_name: dbt
+    env_file:
+      - .env
     depends_on:
       clickhouse-server:
         condition: service_healthy
@@ -46,10 +47,7 @@ services:
     environment:
       DBT_PROFILES_DIR: /usr/app/.dbt
       CLICKHOUSE_HOST: clickhouse-server
-      CLICKHOUSE_USER: dbt_user
-      CLICKHOUSE_PASSWORD: dbt_password
       CLICKHOUSE_PORT: 9000
-      CLICKHOUSE_DATABASE: data_warehouse
     tty: true
     command: tail -f /dev/null
 
@@ -105,17 +103,14 @@ services:
     image: my_project_airflow:2.8.1
     container_name: airflow-webserver
     command: webserver
+    env_file:
+      - .env
     environment:
-      CLICKHOUSE_HOST: clickhouse-server
-      CLICKHOUSE_USER: dbt_user
-      CLICKHOUSE_PASSWORD: dbt_password
-      KAGGLE_USERNAME: maxcu1
-      KAGGLE_KEY: 6959be0bd71277228eb41b92cc750fbe
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
       AIRFLOW__CORE__LOAD_EXAMPLES: "False"
       AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth
-      AIRFLOW_CONN_CLICKHOUSE_DEFAULT: clickhouse://dbt_user:dbt_password@clickhouse-server:9000/data_warehouse
+      AIRFLOW_CONN_CLICKHOUSE_DEFAULT: clickhouse://${CLICKHOUSE_USER}:${CLICKHOUSE_PASSWORD}@clickhouse-server:9000/${CLICKHOUSE_DB}
     ports:
       - "8080:8080"
     volumes:
@@ -131,13 +126,13 @@ services:
     image: my_project_airflow:2.8.1
     container_name: airflow-scheduler
     command: scheduler
+    env_file:
+      - .env
     environment:
-      KAGGLE_USERNAME: maxcu1
-      KAGGLE_KEY: 6959be0bd71277228eb41b92cc750fbe
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
       AIRFLOW__CORE__LOAD_EXAMPLES: "False"
-      AIRFLOW_CONN_CLICKHOUSE_DEFAULT: clickhouse://dbt_user:dbt_password@clickhouse-server:9000/data_warehouse
+      AIRFLOW_CONN_CLICKHOUSE_DEFAULT: clickhouse://${CLICKHOUSE_USER}:${CLICKHOUSE_PASSWORD}@clickhouse-server:9000/${CLICKHOUSE_DB}
     volumes:
       - ./airflow/dags:/opt/airflow/dags
       - ./airflow/logs:/opt/airflow/logs

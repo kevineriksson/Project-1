@@ -8,7 +8,9 @@ import requests
 import subprocess
 import clickhouse_connect
 import zipfile
+import shutil
 from airflow import DAG
+from airflow.utils.dates import days_ago
 from airflow.operators.python import PythonOperator
 from airflow.exceptions import AirflowFailException
 
@@ -38,16 +40,20 @@ def ensure_raw_dir():
 
 
 # --- TASK 1: DOWNLOAD TMDb ---
-def download_tmdb(**context):
+def download_tmdb(**kwargs):
     ensure_raw_dir()
     zip_path = os.path.join(RAW_DIR, "tmdb_movies.zip")
-    out_path = os.path.join(RAW_DIR, TMDB_CSV_LOCAL)
     url = "https://www.kaggle.com/api/v1/datasets/download/asaniczka/tmdb-movies-dataset-2023-930k-movies"
+
+    run_date = kwargs.get("ds", datetime.utcnow().strftime("%Y-%m-%d"))
+    versioned_name = f"movies_tmdb_{run_date}.csv"
+    versioned_path = os.path.join(RAW_DIR, versioned_name)
+    final_path = os.path.join(RAW_DIR, TMDB_CSV_LOCAL)
 
     if not KAGGLE_USERNAME or not KAGGLE_KEY:
         raise AirflowFailException("Missing KAGGLE_USERNAME or KAGGLE_KEY environment variables.")
 
-    print("Downloading TMDb dataset...")
+    print(f"Downloading TMDb dataset for run date {run_date} ...")
     resp = requests.get(url, auth=(KAGGLE_USERNAME, KAGGLE_KEY), stream=True, timeout=120)
     if resp.status_code != 200:
         raise AirflowFailException(f"Failed to download TMDb dataset. Status: {resp.status_code}")
@@ -65,9 +71,15 @@ def download_tmdb(**context):
     if not csv_files:
         raise AirflowFailException("No CSV file found in TMDb dataset ZIP")
 
-    os.rename(os.path.join(RAW_DIR, csv_files[0]), out_path)
-    print(f"Renamed '{csv_files[0]}' to '{TMDB_CSV_LOCAL}' at {RAW_DIR}")
-    return out_path
+    src = os.path.join(RAW_DIR, csv_files[0])
+    os.rename(src, versioned_path)
+    shutil.copy(versioned_path, final_path)
+
+    print(f"Saved versioned file: {versioned_path}")
+    print(f"Standardized file for bronze load: {final_path}")
+
+    return final_path
+
 
 
 # --- TASK 2: DOWNLOAD IMDb FILES ---
@@ -214,33 +226,34 @@ def load_clickhouse_bronze(**context):
 
 
 def run_dbt_gold(**context):
-    # Drop existing tables before running dbt
     client = clickhouse_connect.get_client(host=CH_HOST, username=CH_USER, password=CH_PASS)
-    
+
     tables_to_drop = [
         "dim_director",
-        "dim_genre", 
+        "dim_genre",
         "dim_movie",
         "dim_production",
         "dim_date",
-        "fact_movie"  # Add this line
+        "fact_movie"
     ]
-    
+
     for table in tables_to_drop:
         try:
-            client.command(f"DROP TABLE IF EXISTS gold_gold.{table} SYNC")
-            print(f"Dropped table gold_gold.{table}")
+            client.command(f"DROP TABLE IF EXISTS _gold.{table} SYNC")
+            print(f"Dropped table _gold.{table}")
         except Exception as e:
             print(f"Could not drop {table}: {e}")
-    
-    # Now run dbt
+
     cmd = [
         "dbt", "run",
         "--project-dir", "/opt/airflow/project_root/dbt",
         "--profiles-dir", "/opt/airflow/project_root/dbt",
         "--select", "gold"
     ]
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    env = os.environ.copy()
+    env["DBT_SCHEMA"] = "_gold"
+    result = subprocess.run(cmd, capture_output=True, text=True, env=env)
+
     if result.returncode != 0:
         raise AirflowFailException(f"dbt run failed:\n{result.stdout}\n{result.stderr}")
     return result.stdout
@@ -268,16 +281,19 @@ default_args = {
 
 with DAG(
     dag_id="movie_pipeline",
-    start_date=datetime(2025, 10, 1),
+    start_date=days_ago(1),
     schedule_interval="@daily",
     catchup=False,
     default_args=default_args,
     max_active_runs=1,
     dagrun_timeout=timedelta(minutes=30),
     description="Ingest TMDb + IMDb → ClickHouse Bronze → dbt Gold",
+    params={"run_date": "{{ ds }}"}
 ) as dag:
-
-    t_tmdb = PythonOperator(task_id="download_tmdb", python_callable=download_tmdb)
+    t_tmdb = PythonOperator(
+    task_id="download_tmdb",
+    python_callable=download_tmdb
+)
     t_basics = PythonOperator(task_id="download_imdb_basics", python_callable=download_imdb_basics)
     t_crew = PythonOperator(task_id="download_imdb_crew", python_callable=download_imdb_crew)
     t_names = PythonOperator(task_id="download_imdb_names", python_callable=download_imdb_names)
