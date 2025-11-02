@@ -71,11 +71,12 @@ models:
     description: "Movie fact table"
     columns:
       - name: fact_id
-        description: "Surrogate key for each fact record"
         tests: [not_null, unique]
       - name: movie_id
-        description: "FK to dim_movie"
         tests: [not_null]
+        description: "FK to dim_movie"
+      - name: imdb_id
+        description: "Original IMDB id"
       - name: director_id
         description: "FK to dim_director"
       - name: genre_id
