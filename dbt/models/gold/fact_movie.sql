@@ -63,13 +63,14 @@ movie_genre AS (
 
 base AS (
     SELECT
-        t.imdb_id                                 AS movie_id,
+        t.imdb_id,
         d.director_id,
         mg.genre_id,
         mp.production_id,
         dr.date_id                                AS date_id,
         t.vote_average                            AS vote_avg,
         t.vote_count,
+        t.title,
         t.revenue,
         t.budget,
         t.movie_popularity,
@@ -85,15 +86,16 @@ base AS (
 metrics AS (
     SELECT
         b.*,
-        b.revenue - lag(b.revenue, 1) OVER (PARTITION BY b.movie_id ORDER BY b.release_year) AS revenue_growth,
-        b.movie_popularity - lag(b.movie_popularity, 1) OVER (PARTITION BY b.movie_id ORDER BY b.release_year) AS popularity_change,
-        b.vote_avg - lag(b.vote_avg, 1) OVER (PARTITION BY b.movie_id ORDER BY b.release_year) AS vote_avg_change
+        b.revenue - lag(b.revenue, 1) OVER (PARTITION BY b.imdb_id ORDER BY b.release_year) AS revenue_growth,
+        b.movie_popularity - lag(b.movie_popularity, 1) OVER (PARTITION BY b.imdb_id ORDER BY b.release_year) AS popularity_change,
+        b.vote_avg - lag(b.vote_avg, 1) OVER (PARTITION BY b.imdb_id ORDER BY b.release_year) AS vote_avg_change
     FROM base b
 )
 
 SELECT
-    row_number() OVER (ORDER BY movie_id, date_id, director_id, genre_id) AS fact_id,
-    movie_id,
+    row_number() OVER (ORDER BY imdb_id, date_id, director_id, genre_id) AS fact_id,
+    cityHash64(TRIM(title)) AS movie_id,
+    imdb_id,
     director_id,
     genre_id,
     production_id,
