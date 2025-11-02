@@ -3,43 +3,44 @@ CREATE DATABASE IF NOT EXISTS gold;
 
 CREATE TABLE IF NOT EXISTS bronze.tmdb_raw
 (
-    id UInt64,
+    imdb_id String,
     title String,
     release_date Date32,
-    revenue Int64,
+    production_companies String,
     budget Int64,
-    popularity Float32,
+    revenue Int64,
     vote_average Float32,
     vote_count UInt32,
     runtime Int32,
     genres String,
-    ingestion_date Date
+    original_language String
 )
 ENGINE = MergeTree
-ORDER BY (id, ingestion_date);
+ORDER BY (imdb_id);
 
 CREATE TABLE IF NOT EXISTS bronze.imdb_title_basics_raw
 (
     tconst String,
-    titleType String,
     primaryTitle String,
-    originalTitle String,
-    isAdult UInt8,
     startYear Int32,
-    endYear Int32,
-    runtimeMinutes Int32,
-    genres String,
-    ingestion_date Date
+    runtimeMinutes Int32
 )
 ENGINE = MergeTree
-ORDER BY (tconst, ingestion_date);
+ORDER BY (tconst);
 
 CREATE TABLE IF NOT EXISTS bronze.imdb_title_crew_raw
 (
     tconst String,
-    directors String,
-    writers String,
-    ingestion_date Date
+    directors String
 )
 ENGINE = MergeTree
-ORDER BY (tconst, ingestion_date);
+ORDER BY (tconst);
+
+CREATE TABLE IF NOT EXISTS bronze.imdb_name_basics_raw
+(
+    nconst String,
+    primaryName String,
+    primaryProfession String
+)
+ENGINE = MergeTree
+ORDER BY (nconst);

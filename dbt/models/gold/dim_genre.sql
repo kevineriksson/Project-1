@@ -1,17 +1,19 @@
-{{ config(materialized='table', schema='gold') }}
+{{ config(
+    materialized='table',
+    schema='gold',
+    engine='MergeTree()',
+    order_by='genre_id'
+) }}
 
-WITH exploded AS (
+WITH parsed_genres AS (
     SELECT
-        id AS movie_id,
-        arrayJoin(splitByChar(',', replaceAll(genres, ' ', ''))) AS genre_name_raw
-    FROM bronze.tmdb_raw
+        TRIM(splitByChar(',', genres)[1]) AS first_genre
+    FROM {{ source('bronze', 'tmdb_raw') }}
+    WHERE genres IS NOT NULL AND genres != ''
 )
 SELECT
-    row_number() OVER (ORDER BY genre_name_raw) AS genre_id,
-    genre_name_raw                              AS genre_name
-FROM (
-    SELECT DISTINCT genre_name_raw
-    FROM exploded
-    WHERE genre_name_raw != ''
-)
-;
+    cityHash64(first_genre) AS genre_id,
+    first_genre AS genre_name
+FROM parsed_genres
+GROUP BY first_genre
+ORDER BY first_genre

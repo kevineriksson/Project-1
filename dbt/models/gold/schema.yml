@@ -2,30 +2,102 @@ version: 2
 
 models:
   - name: dim_movie
+    description: "Movie dimension table"
     columns:
       - name: movie_id
+        description: "Surrogate key for each movie"
         tests: [not_null, unique]
+      - name: imdb_id
+        description: "Original IMDb or TMDB ID"
+      - name: movie_title
+        description: "Title of the movie"
+      - name: movie_runtime
+        description: "Runtime in minutes"
+      - name: language
+        description: "Original language of the movie"
 
   - name: dim_genre
+    description: "Genre dimension table"
     columns:
       - name: genre_id
+        description: "Surrogate key for each genre"
         tests: [not_null, unique]
+      - name: genre_name
+        description: "Name of the genre"
 
-  - name: dim_release_date
+  - name: dim_date
+    description: "Release date dimension table"
     columns:
-      - name: release_id
+      - name: date_id
+        description: "Surrogate key for each date"
         tests: [not_null, unique]
+      - name: full_date
+        description: "Actual date"
+      - name: year
+        description: "Year"
+      - name: month
+        description: "Month number"
+      - name: day
+        description: "Day of month"
+      - name: week
+        description: "ISO week number"
+      - name: weekday
+        description: "Day of week name"
+      - name: season
+        description: "Season (Winter/Spring/Summer/Autumn)"
+      - name: is_weekend
+        description: "1 if weekend, 0 otherwise"
+      - name: holiday_name
+        description: "Name of holiday if applicable"
+      - name: is_holiday
+        description: "1 if holiday, 0 otherwise"
 
   - name: dim_production
+    description: "Production company dimension table"
     columns:
-      - name: prod_id
+      - name: production_id
+        description: "Surrogate key for each production company"
         tests: [not_null, unique]
+      - name: production_name
+        description: "Name of the production company"
+      - name: valid_from
+        description: "Record valid from date"
+      - name: valid_to
+        description: "Record valid to date"
+      - name: is_current
+        description: "1 if current record, 0 if expired"
 
   - name: fact_movie
+    description: "Movie fact table"
     columns:
       - name: fact_id
+        description: "Surrogate key for each fact record"
         tests: [not_null, unique]
       - name: movie_id
+        description: "FK to dim_movie"
         tests: [not_null]
-      - name: release_id
+      - name: director_id
+        description: "FK to dim_director"
+      - name: genre_id
+        description: "FK to dim_genre"
+      - name: production_id
+        description: "FK to dim_production"
+      - name: date_id
+        description: "FK to dim_date"
         tests: [not_null]
+      - name: vote_avg
+        description: "Average vote of the movie"
+      - name: vote_count
+        description: "Total vote count"
+      - name: revenue
+        description: "Revenue of the movie"
+      - name: budget
+        description: "Budget of the movie"
+      - name: movie_popularity
+        description: "Popularity metric"
+      - name: revenue_growth
+        description: "Year-over-year revenue growth"
+      - name: popularity_change
+        description: "Year-over-year change in popularity"
+      - name: vote_avg_change
+        description: "Year-over-year change in vote average"

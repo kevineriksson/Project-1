@@ -1,7 +1,6 @@
-apache-airflow==2.9.0
-apache-airflow-providers-http
-clickhouse-connect
-pandas
-requests
-dbt-core
-dbt-clickhouse
+apache-airflow-providers-http==4.10.0
+clickhouse-connect==0.7.0
+pandas==2.1.4
+requests==2.31.0
+dbt-core==1.8.9
+dbt-clickhouse==1.8.9

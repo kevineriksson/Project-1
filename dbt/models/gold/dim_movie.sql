@@ -1,13 +1,27 @@
-{{ config(materialized='table', schema='gold') }}
+{{ config(
+    materialized='table',
+    schema='gold',
+    engine='MergeTree()',
+    order_by='movie_id'
+) }}
 
+WITH movie_src AS (
+    SELECT
+        TRIM(title) AS movie_title,
+        imdb_id,
+        release_date,
+        runtime AS movie_runtime,
+        original_language AS language
+    FROM {{ source('bronze', 'tmdb_raw') }}
+    WHERE title IS NOT NULL AND title != ''
+)
 SELECT
-    tmdb.id            AS movie_id,
-    b.tconst           AS imdb_id,
-    tmdb.title         AS movie_title,
-    tmdb.runtime       AS movie_runtime,
-    tmdb.popularity    AS movie_popularity
-FROM bronze.tmdb_raw tmdb
-LEFT JOIN bronze.imdb_title_basics_raw b
-    ON b.primaryTitle = tmdb.title
-    AND toInt32OrZero(b.startYear) = toYear(tmdb.release_date)
-;
+    cityHash64(movie_title) AS movie_id,
+    any(imdb_id) AS imdb_id,
+    movie_title,
+    any(release_date) AS release_date,
+    any(movie_runtime) AS movie_runtime,
+    any(language) AS language
+FROM movie_src
+GROUP BY movie_title
+ORDER BY movie_title

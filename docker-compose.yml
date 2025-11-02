@@ -1,64 +1,152 @@
+version: "3.9"
+
 services:
-  clickhouse:
-    image: clickhouse/clickhouse-server:latest
-    container_name: ch_server
+  # ----------------------------------------
+  # 1. ClickHouse Data Warehouse
+  # ----------------------------------------
+  clickhouse-server:
+    image: clickhouse/clickhouse-server
+    container_name: clickhouse-server
+    environment:
+      CLICKHOUSE_USER: dbt_user
+      CLICKHOUSE_PASSWORD: dbt_password
+      CLICKHOUSE_DB: data_warehouse
     ports:
       - "8123:8123"
       - "9000:9000"
     volumes:
-      - clickhouse_data:/var/lib/clickhouse
+      - ./clickhouse_data:/var/lib/clickhouse/
+      - ./sql:/sql
       - ./clickhouse/init:/docker-entrypoint-initdb.d
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    healthcheck:
+      test: ["CMD", "clickhouse-client", "--query", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+  # ----------------------------------------
+  # 2. dbt (Data Build Tool)
+  # ----------------------------------------
+  dbt:
+    build:
+      context: .
+      dockerfile: dbt/Dockerfile
+    image: my_project_dbt:latest
+    container_name: dbt
+    depends_on:
+      clickhouse-server:
+        condition: service_healthy
+    volumes:
+      - .:/usr/app
+    working_dir: /usr/app
     environment:
-      CLICKHOUSE_DB: bronze
-      CLICKHOUSE_USER: analytics
-      CLICKHOUSE_PASSWORD: analytics_pw
+      DBT_PROFILES_DIR: /usr/app/.dbt
+      CLICKHOUSE_HOST: clickhouse-server
+      CLICKHOUSE_USER: dbt_user
+      CLICKHOUSE_PASSWORD: dbt_password
+      CLICKHOUSE_PORT: 9000
+      CLICKHOUSE_DATABASE: data_warehouse
+    tty: true
+    command: tail -f /dev/null
 
+  # ----------------------------------------
+  # 3. Airflow Components
+  # ----------------------------------------
   airflow-db:
-    image: postgres:16
-    container_name: airflow_db
+    container_name: airflow-db
+    image: postgres:16.4
     environment:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
       POSTGRES_DB: airflow
     volumes:
-      - airflow_db_data:/var/lib/postgresql/data
+      - ./pgdata_airflow:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow"]
+      interval: 10s
+      retries: 5
+    restart: always
 
-  airflow:
-    image: apache/airflow:2.9.0-python3.12
-    container_name: airflow_main
-    platform: linux/amd64
-    depends_on:
-      - airflow-db
-      - clickhouse
+  airflow-base:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: my_project_airflow:2.8.1
+
+  airflow-init:
+    image: my_project_airflow:2.8.1
+    container_name: airflow-init
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        /bin/bash -c "while !</dev/tcp/airflow-db/5432; do sleep 1; done;"
+        airflow db init
+        airflow users create \
+          --username airflow \
+          --password airflow \
+          --firstname Admin \
+          --lastname User \
+          --role Admin \
+          --email admin@example.com
     environment:
-      AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
-      AIRFLOW__CORE__FERNET_KEY: "not-secure-dev-key"
-      AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
-      AIRFLOW__WEBSERVER__PORT: 8080
-      CLICKHOUSE_HOST: clickhouse
-      CLICKHOUSE_USER: analytics
-      CLICKHOUSE_PASSWORD: analytics_pw
-    ports:
-      - "8090:8080"
     volumes:
       - ./airflow/dags:/opt/airflow/dags
-      - ./airflow/requirements.txt:/requirements.txt
-      - ./dbt:/opt/dbt
-    entrypoint: /bin/bash
-    command: >
-      -c "
-        pip install --no-cache-dir -r /requirements.txt;
-        echo 'Waiting for Postgres...';
-        until pg_isready -h airflow-db -p 5432 -U airflow; do sleep 1; done;
-        echo 'Initializing Airflow DB...';
-        airflow db init;
-        airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com || true;
-        airflow scheduler &
-        exec airflow webserver
-      "
+    depends_on:
+      - airflow-db
+    restart: "no"
+
+  airflow-webserver:
+    image: my_project_airflow:2.8.1
+    container_name: airflow-webserver
+    command: webserver
+    environment:
+      CLICKHOUSE_HOST: clickhouse-server
+      CLICKHOUSE_USER: dbt_user
+      CLICKHOUSE_PASSWORD: dbt_password
+      KAGGLE_USERNAME: maxcu1
+      KAGGLE_KEY: 6959be0bd71277228eb41b92cc750fbe
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth
+      AIRFLOW_CONN_CLICKHOUSE_DEFAULT: clickhouse://dbt_user:dbt_password@clickhouse-server:9000/data_warehouse
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+      - .:/opt/airflow/project_root
+    depends_on:
+      - airflow-init
+      - clickhouse-server
+    restart: always
+
+  airflow-scheduler:
+    image: my_project_airflow:2.8.1
+    container_name: airflow-scheduler
+    command: scheduler
+    environment:
+      KAGGLE_USERNAME: maxcu1
+      KAGGLE_KEY: 6959be0bd71277228eb41b92cc750fbe
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      AIRFLOW_CONN_CLICKHOUSE_DEFAULT: clickhouse://dbt_user:dbt_password@clickhouse-server:9000/data_warehouse
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+      - .:/opt/airflow/project_root
+    depends_on:
+      - airflow-init
+      - clickhouse-server
+    restart: always
 
 volumes:
+  pgdata_airflow:
   clickhouse_data:
-  airflow_db_data:

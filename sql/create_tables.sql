@@ -14,8 +14,8 @@ CREATE TABLE Dim_Production (
     prod_role VARCHAR(50)
 );
 
--- Create the Dim_Release_Date table
-CREATE TABLE Dim_Release_Date (
+-- Create the Dim_Date table
+CREATE TABLE Dim_Date (
     release_ID INT PRIMARY KEY,
     date_full DATE,
     year SMALLINT,
@@ -39,7 +39,7 @@ CREATE TABLE Fact_Movie (
     revenue BIGINT,
     budget BIGINT,
     FOREIGN KEY (movie_ID) REFERENCES Dim_Movie(movie_ID),
-    FOREIGN KEY (release_ID) REFERENCES Dim_Release_Date(release_ID)
+    FOREIGN KEY (release_ID) REFERENCES Dim_Date(release_ID)
 );
 
 -- Create the Movie_Genre table (Junction table between movies and genres)
