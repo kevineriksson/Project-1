@@ -25,7 +25,7 @@ models:
       - name: genre_name
         description: "Name of the genre"
 
-  - name: dim_release_date
+  - name: dim_date
     description: "Release date dimension table"
     columns:
       - name: date_id
@@ -51,10 +51,6 @@ models:
         description: "Name of holiday if applicable"
       - name: is_holiday
         description: "1 if holiday, 0 otherwise"
-      - name: days_until_holiday
-        description: "Days until next holiday (placeholder)"
-      - name: days_after_holiday
-        description: "Days after previous holiday (placeholder)"
 
   - name: dim_production
     description: "Production company dimension table"
@@ -87,7 +83,7 @@ models:
       - name: production_id
         description: "FK to dim_production"
       - name: date_id
-        description: "FK to dim_release_date"
+        description: "FK to dim_date"
         tests: [not_null]
       - name: vote_avg
         description: "Average vote of the movie"

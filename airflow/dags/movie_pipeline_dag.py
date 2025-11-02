@@ -109,7 +109,7 @@ def load_clickhouse_bronze(**context):
     # Keep only relevant fields for the analytical model
     expected_cols = [
         "imdb_id", "title", "release_date","production_companies",
-        "budget", "revenue", "vote_average",
+        "budget", "revenue", "vote_average","original_language",
         "vote_count", "runtime", "genres"
     ]
     tmdb_df = tmdb_df[[c for c in tmdb_df.columns if c in expected_cols]]
@@ -222,7 +222,7 @@ def run_dbt_gold(**context):
         "dim_genre", 
         "dim_movie",
         "dim_production",
-        "dim_release_date",
+        "dim_date",
         "fact_movie"  # Add this line
     ]
     

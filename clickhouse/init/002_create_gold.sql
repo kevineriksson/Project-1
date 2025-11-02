@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS gold.dim_genre
 ENGINE = MergeTree
 ORDER BY genre_id;
 
-CREATE TABLE IF NOT EXISTS gold.dim_release_date
+CREATE TABLE IF NOT EXISTS gold.dim_date
 (
     release_id UInt32,
     date_full Date32,

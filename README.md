@@ -58,5 +58,5 @@ To analyze movie trends, ratings, and revenues for a streaming service. The anal
 
 * `dim_movie` (Type 1) – movie info, no history tracking
 * `dim_production` (Type 2) – track company name changes
-* `dim_release_date` (Static) – release date info
+* `dim_date` (Static) – release date info
 * `dim_genre` (Static) – list of genres

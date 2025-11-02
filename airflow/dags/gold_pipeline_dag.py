@@ -32,7 +32,7 @@ def run_dbt_gold(**context):
         "dim_genre", 
         "dim_movie",
         "dim_production",
-        "dim_release_date",
+        "dim_date",
         "fact_movie"  # Add this line
     ]
     

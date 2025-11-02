@@ -34,7 +34,7 @@ SELECT
     ROUND(AVG(f.vote_avg), 2) AS avg_rating,
     ROUND(AVG(f.revenue), 0) AS avg_revenue
 FROM Fact_Movie f
-JOIN Dim_Release_Date r ON f.release_ID = r.release_ID
+JOIN Dim_Date r ON f.release_ID = r.release_ID
 GROUP BY r.year
 ORDER BY r.year;
 
@@ -49,7 +49,7 @@ FROM Fact_Movie f
 JOIN Dim_Movie m ON f.movie_ID = m.movie_ID
 JOIN Movie_Genre mg ON f.movie_ID = mg.movie_ID
 JOIN Dim_Genre g ON mg.genre_ID = g.genre_ID
-JOIN Dim_Release_Date r ON f.release_ID = r.release_ID
+JOIN Dim_Date r ON f.release_ID = r.release_ID
 WHERE r.year = 2023
 QUALIFY ROW_NUMBER() OVER (PARTITION BY g.genre_name ORDER BY f.revenue DESC) <= 10;
 

@@ -18,6 +18,7 @@ WITH filtered_tmdb AS (
         runtime,
         genres,
         original_language,
+        
         (vote_average * log(1 + vote_count)) AS movie_popularity
     FROM {{ source('bronze', 'tmdb_raw') }}
 ),
@@ -77,7 +78,7 @@ base AS (
     LEFT JOIN movie_genre mg       ON mg.movie_id = t.imdb_id
     LEFT JOIN first_director d     ON d.movie_id = t.imdb_id
     LEFT JOIN movie_production mp  ON mp.movie_id = t.imdb_id
-    LEFT JOIN {{ ref('dim_release_date') }} dr
+    LEFT JOIN {{ ref('dim_date') }} dr
         ON dr.full_date = t.release_date
 ),
 

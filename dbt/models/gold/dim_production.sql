@@ -6,7 +6,7 @@
 ) }}
 
 WITH production_list AS (
-    TRIM(splitByChar(',', production_companies)[1]) AS production_name
+    SELECT TRIM(splitByChar(',', production_companies)[1]) AS production_name
     FROM {{ source('bronze', 'tmdb_raw') }}
     WHERE production_companies IS NOT NULL AND production_companies != ''
 )
