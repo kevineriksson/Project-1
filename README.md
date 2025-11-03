@@ -120,11 +120,13 @@ clickhouse-client --query "SHOW TABLES FROM _gold"
   To fix it, increase memory resource allocation in Docker, or stop any resource heavy applications during task activation.
   When using wsl, it might help to create a .wslconfig file in your user folder with the following content based on your system memory:
   
+  ```
   [wsl2]
   memory=6GB
   processors=4
   swap=2GB
   localhostForwarding=true
+  ```
 
   ---
 
