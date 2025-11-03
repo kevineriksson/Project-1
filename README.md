@@ -139,13 +139,51 @@ clickhouse-client --query "SHOW TABLES FROM _gold"
 
 ### 6. Example query results
 * Which genres have the highest average ratings?
+```sql
+SELECT
+    g.genre_name,
+    round(AVG(fm.vote_avg), 2) AS avg_rating
+FROM _gold.fact_movie AS fm
+INNER JOIN _gold.dim_genre AS g
+    ON fm.genre_id = g.genre_id
+GROUP BY g.genre_name
+ORDER BY avg_rating DESC;
+```
 <img width="1650" height="583" alt="Q1" src="https://github.com/user-attachments/assets/f980fc71-f836-453a-90ed-7e6cf2d0a656" />
 
 * Which directors consistently produce high-rated movies and high revenue?
-<img width="1650" height="668" alt="Q2" src="https://github.com/user-attachments/assets/f4de6c6b-7693-4502-bf8e-3a9570741e75" />
+```sql
+SELECT
+    d.director_name,
+    round(AVG(fm.vote_avg), 2) AS avg_rating,
+    round(AVG(fm.revenue), 2) AS avg_revenue,
+    COUNT(fm.movie_id) AS movie_count
+FROM _gold.fact_movie AS fm
+INNER JOIN _gold.dim_director AS d
+    ON fm.director_id = d.director_id
+GROUP BY d.director_name
+HAVING 
+    COUNT(fm.movie_id) >= 5
+    AND AVG(fm.vote_avg) > 6.5
+    AND AVG(fm.revenue) > 10000000
+ORDER BY avg_rating DESC, avg_revenue DESC
+LIMIT 10;
+```
+<img width="1842" height="527" alt="Q2" src="https://github.com/user-attachments/assets/41a98703-1181-4d5d-95eb-b612a137b981" />
 
 * How does average rating correlate with box-office revenue across release years?
-<img width="1654" height="672" alt="Q3" src="https://github.com/user-attachments/assets/6aa62e69-b5b6-4f9a-a206-c7920e5ccfd2" />
+```sql
+SELECT
+    toYear(m.release_date) AS release_year,
+    round(AVG(fm.vote_avg), 2) AS avg_rating,
+    round(AVG(fm.revenue), 0) AS avg_revenue
+FROM _gold.fact_movie AS fm
+INNER JOIN _gold.dim_movie AS m
+    ON fm.movie_id = m.imdb_id
+GROUP BY release_year
+ORDER BY release_year ASC;
+```
+<img width="1830" height="813" alt="Q3" src="https://github.com/user-attachments/assets/292904b2-8718-499e-bee7-78843aeacbe6" />
 
 * What are the top 10 movies by revenue per genre for a given year?
 ```sql
