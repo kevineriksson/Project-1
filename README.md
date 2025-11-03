@@ -149,7 +149,7 @@ INNER JOIN _gold.dim_genre AS g
 GROUP BY g.genre_name
 ORDER BY avg_rating DESC;
 ```
-<img width="1650" height="583" alt="Q1" src="https://github.com/user-attachments/assets/f980fc71-f836-453a-90ed-7e6cf2d0a656" />
+<img width="1820" height="658" alt="Q1" src="https://github.com/user-attachments/assets/40340f45-9699-475f-9ad8-5461912948f0" />
 
 * Which directors consistently produce high-rated movies and high revenue?
 ```sql
