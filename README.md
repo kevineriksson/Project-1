@@ -104,7 +104,12 @@ Pipeline tasks:
 
 * Ensure Kaggle API credentials are correct.
 * Confirm Docker containers are running before triggering Airflow.
-* Inspect ClickHouse tables:
+* Enter the credentials and inspect ClickHouse tables:
+
+```
+Username: dbt_user
+Password: dbt_password
+```
 
 ```bash
 clickhouse-client --query "SHOW TABLES FROM _gold"
@@ -141,12 +146,46 @@ clickhouse-client --query "SHOW TABLES FROM _gold"
 <img width="1654" height="672" alt="Q3" src="https://github.com/user-attachments/assets/6aa62e69-b5b6-4f9a-a206-c7920e5ccfd2" />
 
 * What are the top 10 movies by revenue per genre for a given year?
-
+```sql
+SELECT
+    g.genre_name,
+    anyHeavy(m.movie_title) AS top_movie,
+    max(fm.revenue) AS top_revenue
+FROM _gold.fact_movie AS fm
+INNER JOIN _gold.dim_movie AS m
+    ON fm.movie_id = m.imdb_id
+INNER JOIN _gold.dim_genre AS g
+    ON fm.genre_id = g.genre_id
+WHERE toYear(m.release_date) = 2005
+GROUP BY g.genre_name
+ORDER BY top_revenue DESC
+LIMIT 10;
+```
 <img width="1833" height="403" alt="Q4" src="https://github.com/user-attachments/assets/5e3ccf5e-04a8-4ddc-9753-8412ea2d6e51" />
 
 * How does the runtime affect changes to the overall box-office revenue?
-    
-<img width="1650" height="674" alt="Q5" src="https://github.com/user-attachments/assets/0217843b-5ae4-44c4-9a5e-db00b74a4883" />
+```sql
+SELECT
+    multiIf(
+        m.movie_runtime <= 60, '0-60 min',
+        m.movie_runtime <= 90, '61-90 min',
+        m.movie_runtime <= 120, '91-120 min',
+        m.movie_runtime <= 150, '121-150 min',
+        '151+ min'
+    ) AS runtime_bucket,
+    COUNT(fm.movie_id) AS movie_count,
+    AVG(fm.revenue) AS avg_revenue
+FROM _gold.fact_movie AS fm
+INNER JOIN _gold.dim_movie AS m
+    ON fm.movie_id = m.imdb_id
+WHERE m.movie_runtime IS NOT NULL
+  AND fm.revenue IS NOT NULL
+GROUP BY runtime_bucket
+ORDER BY avg_revenue ASC;
+```
+<img width="1826" height="236" alt="Q5" src="https://github.com/user-attachments/assets/c9c8b245-cc5e-43f1-afe4-e17384eb5b5e" />
+
+
 
 
 
