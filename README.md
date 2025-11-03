@@ -151,6 +151,8 @@ ORDER BY avg_rating DESC;
 ```
 <img width="1820" height="658" alt="Q1" src="https://github.com/user-attachments/assets/40340f45-9699-475f-9ad8-5461912948f0" />
 
+
+
 * Which directors consistently produce high-rated movies and high revenue?
 ```sql
 SELECT
@@ -171,6 +173,8 @@ LIMIT 10;
 ```
 <img width="1842" height="527" alt="Q2" src="https://github.com/user-attachments/assets/41a98703-1181-4d5d-95eb-b612a137b981" />
 
+
+
 * How does average rating correlate with box-office revenue across release years?
 ```sql
 SELECT
@@ -184,6 +188,8 @@ GROUP BY release_year
 ORDER BY release_year ASC;
 ```
 <img width="1830" height="813" alt="Q3" src="https://github.com/user-attachments/assets/292904b2-8718-499e-bee7-78843aeacbe6" />
+
+
 
 * What are the top 10 movies by revenue per genre for a given year?
 ```sql
@@ -202,6 +208,8 @@ ORDER BY top_revenue DESC
 LIMIT 10;
 ```
 <img width="1833" height="403" alt="Q4" src="https://github.com/user-attachments/assets/5e3ccf5e-04a8-4ddc-9753-8412ea2d6e51" />
+
+
 
 * How does the runtime affect changes to the overall box-office revenue?
 ```sql
