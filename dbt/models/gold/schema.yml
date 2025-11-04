@@ -67,7 +67,7 @@ models:
       - name: is_current
         description: "1 if current record, 0 if expired"
 
-  - name: fact_movie
+  - name: fact_movie_performance
     description: "Movie fact table"
     columns:
       - name: fact_id

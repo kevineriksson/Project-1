@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS gold.dim_production
 ENGINE = MergeTree
 ORDER BY prod_id;
 
-CREATE TABLE IF NOT EXISTS gold.fact_movie
+CREATE TABLE IF NOT EXISTS gold._performance
 (
     fact_id UInt64,
     movie_id UInt64,

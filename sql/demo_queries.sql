@@ -6,7 +6,7 @@
 SELECT
     g.genre_name,
     round(AVG(fm.vote_avg), 2) AS avg_rating
-FROM _gold.fact_movie AS fm
+FROM _gold.fact_movie_performance AS fm
 INNER JOIN _gold.dim_genre AS g
     ON fm.genre_id = g.genre_id
 GROUP BY g.genre_name
@@ -19,7 +19,7 @@ SELECT
     round(AVG(fm.vote_avg), 2) AS avg_rating,
     round(AVG(fm.revenue), 2) AS avg_revenue,
     COUNT(fm.movie_id) AS movie_count
-FROM _gold.fact_movie AS fm
+FROM _gold.fact_movie_performance AS fm
 INNER JOIN _gold.dim_director AS d
     ON fm.director_id = d.director_id
 GROUP BY d.director_name
@@ -36,7 +36,7 @@ SELECT
     toYear(m.release_date) AS release_year,
     round(AVG(fm.vote_avg), 2) AS avg_rating,
     round(AVG(fm.revenue), 0) AS avg_revenue
-FROM _gold.fact_movie AS fm
+FROM _gold.fact_movie_performance AS fm
 INNER JOIN _gold.dim_movie AS m
     ON fm.movie_id = m.imdb_id
 GROUP BY release_year
@@ -49,7 +49,7 @@ SELECT
     g.genre_name,
     anyHeavy(m.movie_title) AS top_movie,
     max(fm.revenue) AS top_revenue
-FROM _gold.fact_movie AS fm
+FROM _gold.fact_movie_performance AS fm
 INNER JOIN _gold.dim_movie AS m
     ON fm.movie_id = m.imdb_id
 INNER JOIN _gold.dim_genre AS g
@@ -71,7 +71,7 @@ SELECT
     ) AS runtime_bucket,
     COUNT(fm.movie_id) AS movie_count,
     AVG(fm.revenue) AS avg_revenue
-FROM _gold.fact_movie AS fm
+FROM _gold.fact_movie_performance AS fm
 INNER JOIN _gold.dim_movie AS m
     ON fm.movie_id = m.imdb_id
 WHERE m.movie_runtime IS NOT NULL

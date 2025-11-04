@@ -234,7 +234,7 @@ def run_dbt_gold(**context):
         "dim_movie",
         "dim_production",
         "dim_date",
-        "fact_movie"
+        "fact_movie_performance"
     ]
 
     for table in tables_to_drop:

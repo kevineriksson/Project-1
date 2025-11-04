@@ -29,8 +29,8 @@ CREATE TABLE Dim_Genre (
     genre_name VARCHAR(100)
 );
 
--- Create the Fact_Movie table
-CREATE TABLE Fact_Movie (
+-- Create the Fact_Movie_Performance table
+CREATE TABLE Fact_Movie_Performance (
     fact_ID INT PRIMARY KEY,
     movie_ID INT,
     release_ID INT,
