@@ -136,8 +136,23 @@ clickhouse-client --query "SHOW TABLES FROM _gold"
 <img width="1896" height="895" alt="DAG_2" src="https://github.com/user-attachments/assets/a0e9750e-6d54-47f5-88a2-2f7fe12e7bf5" />
 
   ---
+### 6. DBT graph / lineage
+Sources (Bronze)
+├── imdb_name_basics_raw
+├── imdb_title_basics_raw
+├── imdb_title_crew_raw
+└── tmdb_raw
+       ↓
+Analytics Layer (Gold / _gold)
+├── dim_movie
+├── dim_genre
+├── dim_director
+├── dim_production
+├── dim_date
+└── fact_movie
+  ---
 
-### 6. Example query results
+### 7. Example query results
 * Which genres have the highest average ratings?
 ```sql
 SELECT
