@@ -150,7 +150,7 @@ Analytics Layer (Gold / _gold)
 ├── dim_director
 ├── dim_production
 ├── dim_date
-└── fact_movie
+└── fact_movie_performance
 ```
   ---
 
