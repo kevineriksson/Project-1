@@ -208,7 +208,7 @@ ORDER BY release_year ASC;
 
 
 
-* What are the top 10 movies by revenue per genre for a given year?
+* What are the top movies by revenue per genre for a given year?
 ```sql
 SELECT
     g.genre_name,
