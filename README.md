@@ -137,7 +137,8 @@ clickhouse-client --query "SHOW TABLES FROM _gold"
 
   ---
 ### 6. DBT graph / lineage
-Sources (Bronze)
+```
+    Sources (Bronze)
 ├── imdb_name_basics_raw
 ├── imdb_title_basics_raw
 ├── imdb_title_crew_raw
@@ -150,6 +151,7 @@ Analytics Layer (Gold / _gold)
 ├── dim_production
 ├── dim_date
 └── fact_movie
+```
   ---
 
 ### 7. Example query results
