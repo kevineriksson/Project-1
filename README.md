@@ -9,7 +9,7 @@ The pipeline:
 
 * Downloads and ingests IMDb and TMDb data
 * Cleans and transforms it through **bronze → silver → gold** layers
-* Builds a **star schema** under the `_gold` schema
+* Builds a **star schema** under the `gold` schema
 * Runs automatically using Airflow
 
 ---
@@ -95,7 +95,7 @@ Pipeline tasks:
 
 1. Download IMDb and TMDb datasets via Kaggle API
 2. Load raw data into ClickHouse (**bronze layer**)
-4. Transform and clean data. Build final star schema in `_gold` (**gold layer**)
+4. Transform and clean data. Build final star schema in `gold` (**gold layer**)
 5. Run dbt tests for data quality
 
 ---
@@ -112,7 +112,7 @@ Password: dbt_password
 ```
 
 ```bash
-clickhouse-client --query "SHOW TABLES FROM _gold"
+clickhouse-client --query "SHOW TABLES FROM gold"
 ```
 
 * All transformations are defined in dbt models for reproducibility and testing.
@@ -144,7 +144,7 @@ clickhouse-client --query "SHOW TABLES FROM _gold"
 ├── imdb_title_crew_raw
 └── tmdb_raw
        ↓
-Analytics Layer (Gold / _gold)
+Analytics Layer (Gold / gold)
 ├── dim_movie
 ├── dim_genre
 ├── dim_director
@@ -160,8 +160,8 @@ Analytics Layer (Gold / _gold)
 SELECT
     g.genre_name,
     round(AVG(fm.vote_avg), 2) AS avg_rating
-FROM _gold.fact_movie_performance AS fm
-INNER JOIN _gold.dim_genre AS g
+FROM gold.fact_movie_performance AS fm
+INNER JOIN gold.dim_genre AS g
     ON fm.genre_id = g.genre_id
 GROUP BY g.genre_name
 ORDER BY avg_rating DESC;
@@ -177,8 +177,8 @@ SELECT
     round(AVG(fm.vote_avg), 2) AS avg_rating,
     round(AVG(fm.revenue), 2) AS avg_revenue,
     COUNT(fm.movie_id) AS movie_count
-FROM _gold.fact_movie_performance AS fm
-INNER JOIN _gold.dim_director AS d
+FROM gold.fact_movie_performance AS fm
+INNER JOIN gold.dim_director AS d
     ON fm.director_id = d.director_id
 GROUP BY d.director_name
 HAVING 
@@ -198,8 +198,8 @@ SELECT
     toYear(m.release_date) AS release_year,
     round(AVG(fm.vote_avg), 2) AS avg_rating,
     round(AVG(fm.revenue), 0) AS avg_revenue
-FROM _gold.fact_movie_performance AS fm
-INNER JOIN _gold.dim_movie AS m
+FROM gold.fact_movie_performance AS fm
+INNER JOIN gold.dim_movie AS m
     ON fm.movie_id = m.imdb_id
 GROUP BY release_year
 ORDER BY release_year ASC;
@@ -214,10 +214,10 @@ SELECT
     g.genre_name,
     anyHeavy(m.movie_title) AS top_movie,
     max(fm.revenue) AS top_revenue
-FROM _gold.fact_movie_performance AS fm
-INNER JOIN _gold.dim_movie AS m
+FROM gold.fact_movie_performance AS fm
+INNER JOIN gold.dim_movie AS m
     ON fm.movie_id = m.imdb_id
-INNER JOIN _gold.dim_genre AS g
+INNER JOIN gold.dim_genre AS g
     ON fm.genre_id = g.genre_id
 WHERE toYear(m.release_date) = 2005
 GROUP BY g.genre_name
@@ -240,8 +240,8 @@ SELECT
     ) AS runtime_bucket,
     COUNT(fm.movie_id) AS movie_count,
     AVG(fm.revenue) AS avg_revenue
-FROM _gold.fact_movie_performance AS fm
-INNER JOIN _gold.dim_movie AS m
+FROM gold.fact_movie_performance AS fm
+INNER JOIN gold.dim_movie AS m
     ON fm.movie_id = m.imdb_id
 WHERE m.movie_runtime IS NOT NULL
   AND fm.revenue IS NOT NULL
