@@ -13,5 +13,4 @@ models:
     +materialized: table
     +on_schema_change: append_new_columns
     gold:
-      +schema: gold
       +on_schema_change: append_new_columns 

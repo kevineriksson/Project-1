@@ -7,7 +7,7 @@ movie_clickhouse:
       port: 8123
       user: dbt_user
       password: dbt_password
-      schema: ""
+      schema: "{{ env_var('DBT_SCHEMA', 'gold') }}"
       driver: http
       secure: false
       verify: false

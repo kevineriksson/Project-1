@@ -45,7 +45,7 @@ services:
       - .:/usr/app
     working_dir: /usr/app
     environment:
-      DBT_PROFILES_DIR: /usr/app/.dbt
+      DBT_PROFILES_DIR: /usr/app/dbt
       CLICKHOUSE_HOST: clickhouse-server
       CLICKHOUSE_PORT: 9000
     tty: true

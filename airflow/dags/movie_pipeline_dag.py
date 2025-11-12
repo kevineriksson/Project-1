@@ -239,8 +239,8 @@ def run_dbt_gold(**context):
 
     for table in tables_to_drop:
         try:
-            client.command(f"DROP TABLE IF EXISTS _gold.{table} SYNC")
-            print(f"Dropped table _gold.{table}")
+            client.command(f"DROP TABLE IF EXISTS gold.{table} SYNC")
+            print(f"Dropped table gold.{table}")
         except Exception as e:
             print(f"Could not drop {table}: {e}")
 
@@ -251,7 +251,7 @@ def run_dbt_gold(**context):
         "--select", "gold"
     ]
     env = os.environ.copy()
-    env["DBT_SCHEMA"] = "_gold"
+    env["DBT_SCHEMA"] = "gold"
     result = subprocess.run(cmd, capture_output=True, text=True, env=env)
 
     if result.returncode != 0:

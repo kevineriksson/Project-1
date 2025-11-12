@@ -1,6 +1,5 @@
 {{ config(
     materialized = 'table',
-    schema = 'gold',
     engine = 'MergeTree()',
     order_by = 'date_id'
 ) }}
