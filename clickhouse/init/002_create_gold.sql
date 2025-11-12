@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS gold.dim_production
 ENGINE = MergeTree
 ORDER BY prod_id;
 
-CREATE TABLE IF NOT EXISTS gold._performance
+CREATE TABLE IF NOT EXISTS gold.fact_movie_performance
 (
     fact_id UInt64,
     movie_id UInt64,
@@ -50,4 +50,5 @@ CREATE TABLE IF NOT EXISTS gold._performance
 )
 ENGINE = MergeTree
 PARTITION BY release_year
+
 ORDER BY (movie_id, release_id, fact_id);
