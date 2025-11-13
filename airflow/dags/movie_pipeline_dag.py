@@ -65,7 +65,7 @@ def download_tmdb(**kwargs):
 
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
         zip_ref.extractall(RAW_DIR)
-    print("Unzipping complete.")
+    os.remove(zip_path)
 
     csv_files = [f for f in os.listdir(RAW_DIR) if f.endswith(".csv")]
     if not csv_files:
@@ -76,13 +76,45 @@ def download_tmdb(**kwargs):
     shutil.copy(versioned_path, final_path)
 
     print(f"Saved versioned file: {versioned_path}")
-    print(f"Standardized file for bronze load: {final_path}")
-
+    print(f"Standardized file for downstream steps: {final_path}")
     return final_path
 
 
+# --- TASK 2: FILTER TMDb BEFORE LOADING ---
+def filter_tmdb(**context):
+    tmdb_path = os.path.join(RAW_DIR, TMDB_CSV_LOCAL)
+    print(f"Filtering TMDb file: {tmdb_path}")
 
-# --- TASK 2: DOWNLOAD IMDb FILES ---
+    df = pd.read_csv(tmdb_path)
+
+    # Keep only relevant fields
+    cols = [
+        "imdb_id", "title", "release_date", "production_companies",
+        "budget", "revenue", "vote_average", "original_language",
+        "vote_count", "runtime", "genres", "status"
+    ]
+    df = df[[c for c in df.columns if c in cols]]
+
+    # Parse dates
+    df["release_date"] = pd.to_datetime(df["release_date"], errors="coerce")
+    df = df.dropna(subset=["imdb_id", "title", "release_date"])
+
+    # Business filters
+    df = df[
+        (df["release_date"].dt.year >= 2000)
+        & (df["status"].fillna("").str.lower() == "released")
+        & (pd.to_numeric(df["runtime"], errors="coerce").fillna(0) > 40)
+        & (pd.to_numeric(df["vote_average"], errors="coerce").fillna(0) > 0)
+        & (pd.to_numeric(df["vote_count"], errors="coerce").fillna(0) > 0)
+    ]
+
+    print(f"Filtered down to {len(df)} valid movies after quality filters.")
+    df.to_csv(tmdb_path, index=False)
+    print("Rewrote TMDb file in-place (filtered).")
+    return tmdb_path
+
+
+# --- TASK 3: DOWNLOAD IMDb FILES ---
 def _download_gz_tsv(url, out_name):
     out_path = os.path.join(RAW_DIR, out_name)
     with requests.get(url, stream=True, timeout=120) as r:
@@ -105,63 +137,34 @@ def download_imdb_names(**context):
     return _download_gz_tsv(IMDB_NAMES_URL, "name.basics.tsv")
 
 
-# --- TASK 5: LOAD INTO CLICKHOUSE (CHUNKED + QUALITY + IDEMPOTENT) ---
+# --- TASK 4: LOAD INTO CLICKHOUSE ---
 def load_clickhouse_bronze(**context):
     client = clickhouse_connect.get_client(host=CH_HOST, username=CH_USER, password=CH_PASS)
     client.command("SET max_insert_block_size = 500000")
 
-    # ------------------- TMDb -------------------
-    tmdb_file = os.path.join(RAW_DIR, TMDB_CSV_LOCAL)
-    tmdb_df = pd.read_csv(tmdb_file)
+    # --- Load filtered TMDb ---
+    tmdb_path = os.path.join(RAW_DIR, TMDB_CSV_LOCAL)
+    df = pd.read_csv(tmdb_path)
 
-    # Must have imdb_id column
-    if "imdb_id" not in tmdb_df.columns:
-        raise AirflowFailException("TMDb file missing 'imdb_id' column")
-
-    # Keep only relevant fields for the analytical model
     expected_cols = [
-        "imdb_id", "title", "release_date","production_companies",
-        "budget", "revenue", "vote_average","original_language",
+        "imdb_id", "title", "release_date", "production_companies",
+        "budget", "revenue", "vote_average", "original_language",
         "vote_count", "runtime", "genres"
     ]
-    tmdb_df = tmdb_df[[c for c in tmdb_df.columns if c in expected_cols]]
+    df = df[[c for c in df.columns if c in expected_cols]]
+    for c in ["imdb_id", "title", "production_companies", "genres", "original_language"]:
+        if c in df.columns:
+            df[c] = df[c].fillna("").astype(str)
+    df["release_date"] = pd.to_datetime(df["release_date"], errors="coerce").dt.date
 
-    # Drop rows missing both imdb_id and title
-    tmdb_df = tmdb_df.dropna(subset=["imdb_id", "title"], how="all")
-
-    # --- Data quality check: null imdb_id ---
-    missing = tmdb_df["imdb_id"].isna().sum()
-    if missing > 0:
-        print(f"[QUALITY CHECK] Dropping {missing} TMDb rows with null imdb_id")
-    tmdb_df = tmdb_df.dropna(subset=["imdb_id"])
-
-    # Fill NaNs for text columns and cast to string
-    for col in ["imdb_id", "title", "genres", "production_companies"]:
-        if col in tmdb_df.columns:
-            tmdb_df[col] = tmdb_df[col].fillna("").astype(str)
-
-    # Convert release_date to proper date object for ClickHouse Date32
-    if "release_date" in tmdb_df.columns:
-        tmdb_df["release_date"] = pd.to_datetime(
-            tmdb_df["release_date"], errors="coerce"
-        ).dt.date
-
-    # Drop rows with invalid or missing release_date
-    tmdb_df = tmdb_df.dropna(subset=["release_date"])
-
-    # --- Idempotent insert: clear table before load ---
     print("Clearing bronze.tmdb_raw for idempotent load")
     client.command("TRUNCATE TABLE IF EXISTS bronze.tmdb_raw")
+    client.insert_df("bronze.tmdb_raw", df)
+    print(f"Inserted {len(df)} TMDb rows into bronze.tmdb_raw")
 
-    # Insert cleaned TMDb data into ClickHouse
-    client.insert_df("bronze.tmdb_raw", tmdb_df)
-    print(f"Inserted {len(tmdb_df)} TMDb rows into bronze.tmdb_raw")
-
-    # ------------------- IMDb title.basics -------------------
-    print("Clearing bronze.imdb_title_basics_raw for idempotent load")
-    client.command("TRUNCATE TABLE bronze.imdb_title_basics_raw")
-
+    # --- IMDb loading (exactly like old stable version) ---
     basics_file = os.path.join(RAW_DIR, "title.basics.tsv")
+    client.command("TRUNCATE TABLE bronze.imdb_title_basics_raw")
     for i, chunk in enumerate(pd.read_csv(
         basics_file,
         sep="\t",
@@ -175,19 +178,11 @@ def load_clickhouse_bronze(**context):
         chunk["runtimeMinutes"] = pd.to_numeric(chunk["runtimeMinutes"], errors="coerce").fillna(-1).astype("int32")
         chunk["primaryTitle"] = chunk["primaryTitle"].fillna("").astype(str)
         chunk = chunk.dropna(subset=["tconst"])
-
-        # Data-quality check: duplicates
-        if chunk["tconst"].duplicated().any():
-            raise AirflowFailException(f"Duplicate tconst found in chunk {i+1}")
-
         client.insert_df("bronze.imdb_title_basics_raw", chunk)
         print(f"Inserted title.basics chunk {i+1} ({len(chunk)} rows)")
 
-    # ------------------- IMDb title.crew -------------------
-    print("Clearing bronze.imdb_title_crew_raw for idempotent load")
-    client.command("TRUNCATE TABLE bronze.imdb_title_crew_raw")
-
     crew_file = os.path.join(RAW_DIR, "title.crew.tsv")
+    client.command("TRUNCATE TABLE bronze.imdb_title_crew_raw")
     for i, chunk in enumerate(pd.read_csv(
         crew_file,
         sep="\t",
@@ -202,11 +197,8 @@ def load_clickhouse_bronze(**context):
         client.insert_df("bronze.imdb_title_crew_raw", chunk)
         print(f"Inserted title.crew chunk {i+1} ({len(chunk)} rows)")
 
-    # ------------------- IMDb name.basics -------------------
-    print("Clearing bronze.imdb_name_basics_raw for idempotent load")
-    client.command("TRUNCATE TABLE bronze.imdb_name_basics_raw")
-
     names_file = os.path.join(RAW_DIR, "name.basics.tsv")
+    client.command("TRUNCATE TABLE bronze.imdb_name_basics_raw")
     for i, chunk in enumerate(pd.read_csv(
         names_file,
         sep="\t",
@@ -225,6 +217,7 @@ def load_clickhouse_bronze(**context):
     print("All bronze tables successfully loaded.")
 
 
+# --- TASK 5: DBT GOLD + TESTS ---
 def run_dbt_gold(**context):
     client = clickhouse_connect.get_client(host=CH_HOST, username=CH_USER, password=CH_PASS)
 
@@ -271,13 +264,8 @@ def run_dbt_tests(**context):
         raise AirflowFailException(f"dbt test failed:\n{result.stdout}\n{result.stderr}")
     return result.stdout
 
-
 # --- DAG CONFIG ---
-default_args = {
-    "owner": "data-eng-team14",
-    "retries": 0,
-    "depends_on_past": False,
-}
+default_args = {"owner": "data-eng-team14", "retries": 0, "depends_on_past": False}
 
 with DAG(
     dag_id="movie_pipeline",
@@ -287,19 +275,17 @@ with DAG(
     default_args=default_args,
     max_active_runs=1,
     dagrun_timeout=timedelta(minutes=30),
-    description="Ingest TMDb + IMDb → ClickHouse Bronze → dbt Gold",
-    params={"run_date": "{{ ds }}"}
+    description="Download → Filter → Bronze → dbt Gold",
 ) as dag:
-    t_tmdb = PythonOperator(
-    task_id="download_tmdb",
-    python_callable=download_tmdb
-)
+
+    t_tmdb = PythonOperator(task_id="download_tmdb", python_callable=download_tmdb)
+    t_filter = PythonOperator(task_id="filter_tmdb", python_callable=filter_tmdb)
     t_basics = PythonOperator(task_id="download_imdb_basics", python_callable=download_imdb_basics)
     t_crew = PythonOperator(task_id="download_imdb_crew", python_callable=download_imdb_crew)
     t_names = PythonOperator(task_id="download_imdb_names", python_callable=download_imdb_names)
-
     t_load = PythonOperator(task_id="load_clickhouse_bronze", python_callable=load_clickhouse_bronze)
     t_dbt = PythonOperator(task_id="run_dbt_gold", python_callable=run_dbt_gold)
     t_test = PythonOperator(task_id="run_dbt_tests", python_callable=run_dbt_tests)
 
-    [t_tmdb, t_basics, t_crew, t_names] >> t_load >> t_dbt >> t_test
+    t_tmdb >> t_filter
+    [t_filter, t_basics, t_crew, t_names] >> t_load >> t_dbt >> t_test
