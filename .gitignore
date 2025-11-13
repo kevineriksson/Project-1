@@ -33,7 +33,7 @@ airflow/dags/__pycache__/
 # --- DBT DIRECTORIES ---
 dbt/target/
 dbt/dbt_packages/
-
+dbt/logs
 # --- IDE / PROJECT SETTINGS ---
 .vscode/
 .idea/
