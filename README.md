@@ -250,6 +250,8 @@ ORDER BY avg_revenue ASC;
 ```
 <img width="1826" height="236" alt="Q5" src="https://github.com/user-attachments/assets/c9c8b245-cc5e-43f1-afe4-e17384eb5b5e" />
 
+---
+
 ### 8. Apache Iceberg Integration
 
 * A new Airflow task load_iceberg_bronze was added to write filtered TMDb movie data into an Apache Iceberg table stored in MinIO (S3-compatible storage).
@@ -285,6 +287,7 @@ SETTINGS
     s3_use_environment_credentials = 0,
     s3_region = 'us-east-1';
 ```
+<img width="1804" height="768" alt="image" src="https://github.com/user-attachments/assets/60dcb654-85b9-4a83-a622-941a608a8d52" />
 
-* INSERT THE PICTURE
+---
 
