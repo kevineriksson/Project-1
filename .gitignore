@@ -24,6 +24,9 @@ venv/
 # --- DOCKER DATA VOLUMES ---
 clickhouse_data/
 pgdata_airflow/
+minio_data/
+iceberg_warehouse/
+
 
 # --- AIRFLOW DIRECTORIES ---
 airflow/logs/

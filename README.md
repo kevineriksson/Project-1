@@ -250,8 +250,41 @@ ORDER BY avg_revenue ASC;
 ```
 <img width="1826" height="236" alt="Q5" src="https://github.com/user-attachments/assets/c9c8b245-cc5e-43f1-afe4-e17384eb5b5e" />
 
+### 8. Apache Iceberg Integration
 
+* A new Airflow task load_iceberg_bronze was added to write filtered TMDb movie data into an Apache Iceberg table stored in MinIO (S3-compatible storage).
 
+* The task creates the Iceberg namespace and table via the REST catalog and stores Parquet + metadata files under: s3://practice-bucket/bronze/tmdb_bronze/
 
+* The DAG now includes the full flow:
+Download → Filter → MinIO Bucket Setup → Iceberg Write → Bronze / Gold Transformations
 
-  
+* ClickHouse OSS does not include the ENGINE = Iceberg table engine.
+To make Iceberg data queryable in ClickHouse, the Iceberg Parquet output files were exposed using the S3 table engine.
+
+* External table definition used to read the Iceberg data from MinIO:
+ ```sql 
+CREATE DATABASE IF NOT EXISTS bronze;
+DROP TABLE IF EXISTS bronze.tmdb_bronze_ch SYNC;
+CREATE TABLE bronze.tmdb_bronze_ch
+(
+    imdb_id String,
+    title String,
+    vote_avg Float64,
+    vote_count Int32,
+    release_date DateTime64,
+    revenue Float64
+)
+ENGINE = S3(
+    'http://minio:9000/practice-bucket/bronze/tmdb_bronze/data/00000-0-30f80b1c-921b-4022-b9ed-4a2949350601.parquet',
+    'minioadmin',
+    'minioadmin',
+    'Parquet'
+)
+SETTINGS
+    s3_use_environment_credentials = 0,
+    s3_region = 'us-east-1';
+```
+
+* INSERT THE PICTURE
+
