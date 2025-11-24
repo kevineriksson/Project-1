@@ -40,3 +40,5 @@ dbt/logs
 # --- IDE / PROJECT SETTINGS ---
 .vscode/
 .idea/
+
+/docker-volume/
