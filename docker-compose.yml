@@ -1,6 +1,38 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# -----------------------------------------------------------------------
+# We don't support docker compose for production environments.
+# If you choose to use this type of deployment make sure to
+# create you own docker environment file (docker/.env) with your own
+# unique random secure passwords and SECRET_KEY.
+#
+# For verbose logging during development:
+# - Set SUPERSET_LOG_LEVEL=debug in docker/.env-local for detailed Superset logs
+# -----------------------------------------------------------------------
+x-superset-image: &superset-image apachesuperset.docker.scarf.sh/apache/superset:${TAG:-latest-dev}
+x-superset-volumes:
+  &superset-volumes # /app/pythonpath_docker will be appended to the PYTHONPATH in the final container
+    - superset_home:/app/superset_home
+
 networks:
   iceberg_network:
     driver: bridge
+
 
 services:
   # ----------------------------------------
@@ -70,7 +102,7 @@ services:
   # ----------------------------------------
   # 2. ClickHouse
   # ----------------------------------------
-  clickhouse-server:
+  docker ps | grep clickhouseserver:
     image: clickhouse/clickhouse-server
     container_name: clickhouse-server
     env_file:
@@ -238,7 +270,7 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.11.4
     environment:
       - discovery.type=single-node
-      - ES_JAVA_OPTS=-Xms1024m -Xmx1024m
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
       - xpack.security.enabled=false
     ports:
       - "9200:9200"
@@ -277,12 +309,12 @@ services:
       OM_DATABASE: ${OM_DATABASE:-openmetadata_db}
 
       # ElasticSearch Configurations
-      ELASTICSEARCH_HOST: ${ELASTICSEARCH_HOST:- elasticsearch}
+      ELASTICSEARCH_HOST: ${ELASTICSEARCH_HOST:-elasticsearch}
       ELASTICSEARCH_PORT: ${ELASTICSEARCH_PORT:-9200}
       ELASTICSEARCH_SCHEME: ${ELASTICSEARCH_SCHEME:-http}
       ELASTICSEARCH_USER: ${ELASTICSEARCH_USER:-""}
       ELASTICSEARCH_PASSWORD: ${ELASTICSEARCH_PASSWORD:-""}
-      SEARCH_TYPE: ${SEARCH_TYPE:- "elasticsearch"}
+      SEARCH_TYPE: ${SEARCH_TYPE:-"elasticsearch"}
 
       # OpenMetadata Server Pipeline Service Client Configuration
       PIPELINE_SERVICE_CLIENT_ENDPOINT: ${PIPELINE_SERVICE_CLIENT_ENDPOINT:-http://ingestion:8080}
@@ -308,6 +340,7 @@ services:
       SERVER_PORT: ${SERVER_PORT:-8585}
       SERVER_ADMIN_PORT: ${SERVER_ADMIN_PORT:-8586}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      
 
       # DB configuration
       DB_DRIVER_CLASS: ${DB_DRIVER_CLASS:-com.mysql.cj.jdbc.Driver}
@@ -320,12 +353,12 @@ services:
       OM_DATABASE: ${OM_DATABASE:-openmetadata_db}
 
       # ElasticSearch Configurations
-      ELASTICSEARCH_HOST: ${ELASTICSEARCH_HOST:- elasticsearch}
+      ELASTICSEARCH_HOST: ${ELASTICSEARCH_HOST:-elasticsearch}
       ELASTICSEARCH_PORT: ${ELASTICSEARCH_PORT:-9200}
       ELASTICSEARCH_SCHEME: ${ELASTICSEARCH_SCHEME:-http}
       ELASTICSEARCH_USER: ${ELASTICSEARCH_USER:-""}
       ELASTICSEARCH_PASSWORD: ${ELASTICSEARCH_PASSWORD:-""}
-      SEARCH_TYPE: ${SEARCH_TYPE:- "elasticsearch"}
+      SEARCH_TYPE: ${SEARCH_TYPE:-"elasticsearch"}
 
       # OpenMetadata Server Pipeline Service Client Configuration
       PIPELINE_SERVICE_CLIENT_ENDPOINT: ${PIPELINE_SERVICE_CLIENT_ENDPOINT:-http://ingestion:8080}
@@ -348,7 +381,10 @@ services:
       test: [ "CMD", "wget", "-q", "--spider",  "http://localhost:8586/healthcheck" ]
     networks:
       - iceberg_network
-
+  
+  # ----------------------------------------
+  # 10. Ingestion
+  # ----------------------------------------
   ingestion:
     container_name: openmetadata_ingestion
     image: docker.getcollate.io/openmetadata/ingestion:1.10.7
@@ -383,6 +419,117 @@ services:
       - ingestion-volume-tmp:/tmp
     networks:
       - iceberg_network
+  
+  # ----------------------------------------
+  # 11. Superset
+  # ----------------------------------------
+  # ----------------------------------------
+  # 11. Superset
+  # ----------------------------------------
+  redis:
+    image: redis:7
+    container_name: superset_cache
+    volumes:
+      - redis:/data
+    networks:
+      - iceberg_network
+
+  db:
+    env_file:
+      - path: .env
+        required: true
+      - path: .env-local
+        required: false
+    image: postgres:16
+    container_name: superset_db
+    volumes:
+      - db_home:/var/lib/postgresql/data
+    networks:
+      - iceberg_network
+
+  superset:
+    env_file:
+      - path: .env
+        required: true
+      - path: .env-local
+        required: false
+    image: *superset-image
+    container_name: superset_app
+    command: ["/app/docker/docker-bootstrap.sh", "app-gunicorn"]
+    user: "root"
+    ports:
+      - 8088:8088
+    depends_on:
+      superset-init:
+        condition: service_completed_successfully
+    volumes: *superset-volumes
+    networks:
+      - iceberg_network
+
+  superset-init:
+    image: *superset-image
+    container_name: superset_init
+    command: ["/app/docker/docker-init.sh"]
+    env_file:
+      - path: .env
+        required: true
+      - path: .env-local
+        required: false
+    depends_on:
+      db:
+        condition: service_started
+      redis:
+        condition: service_started
+    user: "root"
+    volumes: *superset-volumes
+    healthcheck:
+      disable: true
+    networks:
+      - iceberg_network
+
+  superset-worker:
+    image: *superset-image
+    container_name: superset_worker
+    command: ["/app/docker/docker-bootstrap.sh", "worker"]
+    env_file:
+      - path: .env
+        required: true
+      - path: .env-local
+        required: false
+    depends_on:
+      superset-init:
+        condition: service_completed_successfully
+    user: "root"
+    volumes: *superset-volumes
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "celery -A superset.tasks.celery_app:app inspect ping -d celery@$$HOSTNAME",
+        ]
+    networks:
+      - iceberg_network
+
+  superset-worker-beat:
+    image: *superset-image
+    container_name: superset_worker_beat
+    command: ["/app/docker/docker-bootstrap.sh", "beat"]
+    env_file:
+      - path: .env
+        required: true
+      - path: .env-local
+        required: false
+    depends_on:
+      superset-init:
+        condition: service_completed_successfully
+    user: "root"
+    volumes: *superset-volumes
+    healthcheck:
+      disable: true
+    networks:
+      - iceberg_network
+
+
 
 volumes:
   pgdata_airflow:
@@ -393,3 +540,11 @@ volumes:
   ingestion-volume-dags:
   ingestion-volume-tmp:
   db-data:
+  elasticsearch:
+  superset_home:
+    external: false
+  db_home:
+    external: false
+  redis:
+    external: false
+  
