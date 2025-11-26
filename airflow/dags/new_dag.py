@@ -197,6 +197,7 @@ def load_iceberg_bronze(**context):
     required_cols = ["imdb_id", "title", "vote_avg", "vote_count", "release_date", "revenue"]
     df = df[[c for c in required_cols if c in df.columns]].dropna()
     
+    
     df["release_date"] = pd.to_datetime(df["release_date"], errors="coerce")
     
     # FIX 1: Ensure Integer (int32) and Float (float64/double) precision
@@ -243,10 +244,30 @@ def load_iceberg_bronze(**context):
     return table.location()
 
 
-# --- TASK 5: LOAD INTO CLICKHOUSE (IMDb ONLY) ---
+# --- TASK 5: LOAD INTO CLICKHOUSE ---
 def load_clickhouse_bronze(**context):
     client = clickhouse_connect.get_client(host=CH_HOST, username=CH_USER, password=CH_PASS)
     client.command("SET max_insert_block_size = 500000")
+
+    # --- Load filtered TMDb ---
+    tmdb_path = os.path.join(RAW_DIR, TMDB_CSV_LOCAL)
+    df = pd.read_csv(tmdb_path)
+
+    expected_cols = [
+        "imdb_id", "title", "release_date", "production_companies",
+        "budget", "revenue", "vote_average", "original_language",
+        "vote_count", "runtime", "genres"
+    ]
+    df = df[[c for c in df.columns if c in expected_cols]]
+    for c in ["imdb_id", "title", "production_companies", "genres", "original_language"]:
+        if c in df.columns:
+            df[c] = df[c].fillna("").astype(str)
+    df["release_date"] = pd.to_datetime(df["release_date"], errors="coerce").dt.date
+
+    print("Clearing bronze.tmdb_raw for idempotent load")
+    client.command("TRUNCATE TABLE IF EXISTS bronze.tmdb_raw")
+    client.insert_df("bronze.tmdb_raw", df)
+    print(f"Inserted {len(df)} TMDb rows into bronze.tmdb_raw")
 
     # --- IMDb loading ---
     basics_file = os.path.join(RAW_DIR, "title.basics.tsv")
@@ -359,6 +380,50 @@ def run_dbt_tests(**context):
     print("dbt tests successful.")
     return result.stdout
 
+# --- TASK 7: DBT user and role creation for Clickhouse ---
+def run_CH_roles_users(**context):
+    client = clickhouse_connect.get_client(host=CH_HOST, username=CH_USER, password=CH_PASS)
+    statements = [
+        "CREATE ROLE IF NOT EXISTS analyst_full",
+        "CREATE ROLE IF NOT EXISTS analyst_limited",
+        "CREATE USER IF NOT EXISTS npc123 IDENTIFIED BY 'user'",
+        "CREATE USER IF NOT EXISTS bigbo55 IDENTIFIED BY 'admin'"
+    ]
+    for sql in statements:
+        client.command(sql)
+        print(f"Executed: {sql}")
+
+# --- TASK 8: DBT grant roles and view access for Clickhouse users ---
+def run_CH_grants(**context):
+    client = clickhouse_connect.get_client(host=CH_HOST, username=CH_USER, password=CH_PASS)
+    statements = [
+        "GRANT SELECT (vote_avg, vote_count, revenue, budget, movie_popularity, revenue_growth, popularity_change, vote_avg_change, "
+        "date_id, director_id, genre_id, imdb_id, production_id) ON gold.fact_movie_performance TO analyst_limited",
+        
+        "GRANT SELECT (movie_title, imdb_id) ON gold.dim_movie TO analyst_limited",
+        "GRANT SELECT (year, date_id) ON gold.dim_date TO analyst_limited",
+        "GRANT SELECT (director_name, director_id) ON gold.dim_director TO analyst_limited",
+        "GRANT SELECT (genre_name, genre_id) ON gold.dim_genre TO analyst_limited",
+        "GRANT SELECT (production_name, production_id) ON gold.dim_production TO analyst_limited",
+        "GRANT SELECT ON gold.analytical_view_limited TO analyst_limited",
+
+        "GRANT SELECT ON gold.fact_movie_performance TO analyst_full",
+        "GRANT SELECT ON gold.dim_movie TO analyst_full",
+        "GRANT SELECT ON gold.dim_date TO analyst_full",
+        "GRANT SELECT ON gold.dim_director TO analyst_full",
+        "GRANT SELECT ON gold.dim_genre TO analyst_full",
+        "GRANT SELECT ON gold.dim_production TO analyst_full",
+        "GRANT SELECT ON gold.analytical_view_full TO analyst_full",
+        "GRANT SELECT ON gold.analytical_view_limited TO analyst_full",
+
+        "GRANT analyst_full TO bigbo55",
+        "GRANT analyst_limited TO npc123"
+    ]
+
+    for sql in statements:
+        client.command(sql)
+        print(f"Executed: {sql}")
+
 # --- DAG CONFIG ---
 default_args = {"owner": "data-eng-team14", "retries": 0, "depends_on_past": False}
 
@@ -418,6 +483,9 @@ fi
     t_dbt = PythonOperator(task_id="run_dbt_gold", python_callable=run_dbt_gold)
     t_test = PythonOperator(task_id="run_dbt_tests", python_callable=run_dbt_tests)
 
+    t_roles = PythonOperator(task_id="run_CH_roles_users", python_callable=run_CH_roles_users)
+    t_grants = PythonOperator(task_id="run_CH_grants", python_callable=run_CH_grants)
+
     # --- UPDATED DEPENDENCIES ---
     
     # 1. TMDb flow: Filter, then setup bucket, then load Iceberg
@@ -426,5 +494,5 @@ fi
     # 2. IMDb downloads to ClickHouse raw tables
     chain([t_basics, t_crew, t_names], t_load)
     
-    # 3. All bronze creation must complete before dbt starts
-    chain([t_iceberg, t_load], t_dbt, t_test)
+    # 3. All bronze creation must complete before dbt starts. After tests add roles and grants.
+    chain([t_iceberg, t_load], t_dbt, t_test, t_roles, t_grants)
