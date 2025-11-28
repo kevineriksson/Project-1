@@ -26,8 +26,11 @@
 # -----------------------------------------------------------------------
 x-superset-image: &superset-image apachesuperset.docker.scarf.sh/apache/superset:${TAG:-latest-dev}
 x-superset-volumes:
-  &superset-volumes # /app/pythonpath_docker will be appended to the PYTHONPATH in the final container
-    - superset_home:/app/superset_home
+  &superset-volumes
+  - ./superset/docker:/app/docker
+  - ./superset/superset-core:/app/superset-core
+  - superset_home:/app/superset_home
+
 
 networks:
   iceberg_network:
@@ -102,7 +105,7 @@ services:
   # ----------------------------------------
   # 2. ClickHouse
   # ----------------------------------------
-  docker ps | grep clickhouseserver:
+  clickhouse-server:
     image: clickhouse/clickhouse-server
     container_name: clickhouse-server
     env_file:
@@ -162,6 +165,9 @@ services:
   # 5. Airflow Initialization
   # ----------------------------------------
   airflow-init:
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: my_project_airflow:2.8.1
     container_name: airflow-init
     entrypoint: /bin/bash
@@ -191,6 +197,9 @@ services:
   # 6. Airflow Webserver
   # ----------------------------------------
   airflow-webserver:
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: my_project_airflow:2.8.1
     container_name: airflow-webserver
     command: webserver
@@ -221,6 +230,9 @@ services:
   # 7. Airflow Scheduler
   # ----------------------------------------
   airflow-scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: my_project_airflow:2.8.1
     container_name: airflow-scheduler
     command: scheduler
@@ -423,9 +435,7 @@ services:
   # ----------------------------------------
   # 11. Superset
   # ----------------------------------------
-  # ----------------------------------------
-  # 11. Superset
-  # ----------------------------------------
+
   redis:
     image: redis:7
     container_name: superset_cache
