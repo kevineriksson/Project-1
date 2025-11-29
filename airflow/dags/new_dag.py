@@ -262,7 +262,12 @@ def load_clickhouse_bronze(**context):
     for c in ["imdb_id", "title", "production_companies", "genres", "original_language"]:
         if c in df.columns:
             df[c] = df[c].fillna("").astype(str)
-    df["release_date"] = pd.to_datetime(df["release_date"], errors="coerce").dt.date
+    
+    df["release_date"] = pd.to_datetime(df["release_date"], errors="coerce")
+    df = df.dropna(subset=["release_date"])
+
+    # Step 2: convert to python date
+    df["release_date"] = df["release_date"].dt.date
 
     print("Clearing bronze.tmdb_raw for idempotent load")
     client.command("TRUNCATE TABLE IF EXISTS bronze.tmdb_raw")
@@ -384,6 +389,7 @@ def run_dbt_tests(**context):
 def run_CH_roles_users(**context):
     client = clickhouse_connect.get_client(host=CH_HOST, username=CH_USER, password=CH_PASS)
     statements = [
+
         "CREATE ROLE IF NOT EXISTS analyst_full",
         "CREATE ROLE IF NOT EXISTS analyst_limited",
         "CREATE USER IF NOT EXISTS npc123 IDENTIFIED BY 'user'",
