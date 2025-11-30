@@ -39,6 +39,8 @@ Automate a reproducible movie analytics workflow to:
 * **dbt (Data Build Tool)** — transformations & testing
 * **ClickHouse** — analytics data warehouse
 * **Kaggle API** — automated dataset download
+* **OpenMetadata** — data quality tests and column descriptors
+* **Apache Superset** — dashboard based on the gold models
 
 ---
 
@@ -46,7 +48,7 @@ Automate a reproducible movie analytics workflow to:
 
 ### 1. Configure Environment Variables
 
-Create a `.env` file in the project root:
+Create a `.env` file in the project root like the example .env file, adding also your Kaggle credentials:
 
 ```bash
 # .env
@@ -80,6 +82,18 @@ Password: airflow
 ```
 
 Wait until all containers are **healthy**.
+
+In case of any errors with running the containers like elasticsearch, compose it again or do a:
+
+```bash
+docker compose down -v
+```
+followed by another:
+
+```bash
+docker compose up -d
+```
+
 
 ---
 
@@ -129,7 +143,10 @@ clickhouse-client --query "SHOW TABLES FROM gold"
   ```
 * When task 7 or 8 (creating users and roles) fail due to access denied errors - remove the two tasks from the dag along with their dependency chain and
   definitions. Then run the sql for the users manually from the sql files in the sql folder to test querying the views.
-
+  
+* It also may happen that the computer runs out of memory and some tasks fail. To counteract this, when running DAGs in Airflow, disable Superset and Open
+  Metadata containers as those take the most memory.
+  
   ---
 
 ### 5. Airflow DAGs
@@ -299,6 +316,18 @@ The dbt setup now includes 2 additional views based on fact_movie_performance, q
 
 Additionally, for automation purposes, there are two extra tasks within the DAG - Task 7 and 8 for creating users, roles and giving them the required GRANTs.
 Still, it could be that running the tasks will result in an access denied error on some computers, so in that case, remove the two tasks from the dag along with their dependency chain and definitions. Then run the sql for the users manually from the sql files in the sql folder to see the same results.
+
+* Limited user login:
+```
+Username: npc123
+Password: user
+```
+
+* Full access user:
+```
+Username: bigbo55
+Password: admin
+```
 
 * Limited access user accessing the masked view:
 
