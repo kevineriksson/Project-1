@@ -314,7 +314,7 @@ The dbt setup now includes 2 additional views based on fact_movie_performance, q
 * analytical_view_full - data is unchanged
 * analytical_view_limited - with 4 masked columns: movie_title, release_date, director_name, and vote_avg
 
-The sql for view creation and masking logic can be found in dbt -> models -> views.
+The sql for view creation and masking logic can be found in dbt -> models -> gold -> views.
 
 Additionally, for automation purposes, there are two extra tasks within the DAG - Task 7 and 8 for creating users, roles and giving them the required GRANTs.
 Still, it could be that running the tasks will result in an access denied error on some computers, so in that case, remove the two tasks from the dag along with their dependency chain and definitions. Then run the sql for the users manually from the sql files in the sql folder to see the same results.
