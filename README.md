@@ -310,10 +310,10 @@ http://localhost:8585
 
 **Login credentials:**
 
-| Field    | Value                     |
-| -------- | ------------------------- |
-| Username | `admin@open-metadata.org` |
-| Password | `admin`                   |
+```
+Username: admin@open-metadata.org
+Password: admin
+```
 
 After logging in, you can:
 
@@ -345,10 +345,10 @@ http://localhost:8088
 
 **Login credentials:**
 
-| Field    | Value   |
-| -------- | ------- |
-| Username | `admin` |
-| Password | `admin` |
+```
+Username: admin
+Password: admin
+```
 
 Inside Superset:
 
