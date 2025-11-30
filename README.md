@@ -290,7 +290,7 @@ SETTINGS
 <img width="1804" height="768" alt="image" src="https://github.com/user-attachments/assets/60dcb654-85b9-4a83-a622-941a608a8d52" />
 
 
-# **9. OpenMetadata Integration**
+### 9. OpenMetadata Integration**
 
 This project uses **OpenMetadata** as the data governance layer to document datasets, run data quality tests, and catalog analytical assets.
 
@@ -332,7 +332,7 @@ After logging in, you can:
 
 ---
 
-# **10. Apache Superset Integration**
+### 10. Apache Superset Integration**
 
 Apache Superset is used to create the BI dashboard for analyzing ratings metrics.
 
