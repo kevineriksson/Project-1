@@ -127,6 +127,8 @@ clickhouse-client --query "SHOW TABLES FROM gold"
   swap=2GB
   localhostForwarding=true
   ```
+* When task 7 or 8 (creating users and roles) fail due to access denied errors - remove the two tasks from the dag along with their dependency chain and
+  definitions. Then run the sql for the users manually from the sql files in the sql folder to test querying the views.
 
   ---
 
@@ -289,8 +291,28 @@ SETTINGS
 ```
 <img width="1804" height="768" alt="image" src="https://github.com/user-attachments/assets/60dcb654-85b9-4a83-a622-941a608a8d52" />
 
+### 9. Data masking implementation in ClickHouse
 
-### 9. OpenMetadata Integration**
+The dbt setup now includes 2 additional views based on fact_movie_performance, queriable in ClickHouse:
+* analytical_view_full - data is unchanged
+* analytical_view_limited - with 4 masked columns: movie_title, release_date, director_name, and vote_avg
+
+Additionally, for automation purposes, there are two extra tasks within the DAG - Task 7 and 8 for creating users, roles and giving them the required GRANTs.
+Still, it could be that running the tasks will result in an access denied error on some computers, so in that case, remove the two tasks from the dag along with their dependency chain and definitions. Then run the sql for the users manually from the sql files in the sql folder to see the same results.
+
+* Limited access user accessing the masked view:
+
+<img width="1835" height="882" alt="view_1" src="https://github.com/user-attachments/assets/c11dcf38-3578-4660-a027-d6adb7818685" />
+
+* Limited access user accessing the unmasked view:
+
+<img width="1851" height="392" alt="view_2" src="https://github.com/user-attachments/assets/73927baa-0a83-4235-8e47-eec1685d0990" />
+
+* Full access user accessing the unmasked view:
+
+<img width="1832" height="873" alt="view_3" src="https://github.com/user-attachments/assets/5b9aabda-eb04-4cdb-9eb6-eb073cdba5c6" />
+
+### 10. OpenMetadata Integration**
 
 This project uses **OpenMetadata** as the data governance layer to document datasets, run data quality tests, and catalog analytical assets.
 
@@ -332,7 +354,7 @@ After logging in, you can:
 
 ---
 
-### 10. Apache Superset Integration**
+### 11. Apache Superset Integration**
 
 Apache Superset is used to create the BI dashboard for analyzing ratings metrics.
 
