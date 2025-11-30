@@ -395,7 +395,44 @@ services:
       test: [ "CMD", "wget", "-q", "--spider",  "http://localhost:8586/healthcheck" ]
     networks:
       - iceberg_network
-  
+  # ----------------------------------------
+  # 10. Ingestion
+  # ----------------------------------------
+  ingestion:
+    container_name: openmetadata_ingestion
+    image: docker.getcollate.io/openmetadata/ingestion:1.10.7
+    depends_on:
+      elasticsearch:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+      openmetadata-server:
+        condition: service_started
+    environment:
+      AIRFLOW__API__AUTH_BACKENDS: "airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session"
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__OPENMETADATA_AIRFLOW_APIS__DAG_GENERATED_CONFIGS: "/opt/airflow/dag_generated_configs"
+      DB_HOST: ${AIRFLOW_DB_HOST:-mysql}
+      DB_PORT: ${AIRFLOW_DB_PORT:-3306}
+      AIRFLOW_DB: ${AIRFLOW_DB:-airflow_db}
+      DB_SCHEME: ${AIRFLOW_DB_SCHEME:-mysql+mysqldb}
+      DB_USER: ${AIRFLOW_DB_USER:-airflow_user}
+      DB_PASSWORD: ${AIRFLOW_DB_PASSWORD:-airflow_pass}
+      DB_PROPERTIES: ${AIRFLOW_DB_PROPERTIES:-}
+    entrypoint: /bin/bash
+    command:
+      - "/opt/airflow/ingestion_dependency.sh"
+    expose:
+      - 8080
+    ports:
+      - "8081:8080"   # host:8081 -> OM Airflow; your own Airflow uses 8080
+    volumes:
+      - ingestion-volume-dag-airflow:/opt/airflow/dag_generated_configs
+      - ingestion-volume-dags:/opt/airflow/dags
+      - ingestion-volume-tmp:/tmp
+    networks:
+      - iceberg_network
+    
   # ----------------------------------------
   # 11. Superset
   # ----------------------------------------
