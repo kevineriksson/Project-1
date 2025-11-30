@@ -1,4 +1,4 @@
-# Project 2 — Automated Movie Data Warehouse (Airflow + dbt + ClickHouse)
+# Project 3 — Automated Movie Data Warehouse (Airflow + dbt + ClickHouse + Iceberg + Open Metadata + Superset)
 
 ## Overview
 
