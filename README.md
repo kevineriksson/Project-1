@@ -334,7 +334,7 @@ After logging in, you can:
 
 # **10. Apache Superset Integration**
 
-Apache Superset is used to create the BI dashboard for analyzing movie performance metrics.
+Apache Superset is used to create the BI dashboard for analyzing ratings metrics.
 
 ### **Accessing Superset**
 
