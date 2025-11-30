@@ -1,8 +1,41 @@
-version: '3.8'
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# -----------------------------------------------------------------------
+# We don't support docker compose for production environments.
+# If you choose to use this type of deployment make sure to
+# create you own docker environment file (docker/.env) with your own
+# unique random secure passwords and SECRET_KEY.
+#
+# For verbose logging during development:
+# - Set SUPERSET_LOG_LEVEL=debug in docker/.env-local for detailed Superset logs
+# -----------------------------------------------------------------------
+x-superset-image: &superset-image apachesuperset.docker.scarf.sh/apache/superset:${TAG:-latest-dev}
+x-superset-volumes:
+  &superset-volumes
+  - ./superset/docker:/app/docker
+  - ./superset/superset-core:/app/superset-core
+  - superset_home:/app/superset_home
+
 
 networks:
   iceberg_network:
     driver: bridge
+
 
 services:
   # ----------------------------------------
@@ -132,6 +165,9 @@ services:
   # 5. Airflow Initialization
   # ----------------------------------------
   airflow-init:
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: my_project_airflow:2.8.1
     container_name: airflow-init
     entrypoint: /bin/bash
@@ -161,6 +197,9 @@ services:
   # 6. Airflow Webserver
   # ----------------------------------------
   airflow-webserver:
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: my_project_airflow:2.8.1
     container_name: airflow-webserver
     command: webserver
@@ -191,6 +230,9 @@ services:
   # 7. Airflow Scheduler
   # ----------------------------------------
   airflow-scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: my_project_airflow:2.8.1
     container_name: airflow-scheduler
     command: scheduler
@@ -214,7 +256,306 @@ services:
     networks:
       - iceberg_network
 
+  mysql:
+    container_name: openmetadata_mysql
+    image: docker.getcollate.io/openmetadata/db:1.10.7
+    command: "--sort_buffer_size=10M"
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    expose:
+      - 3306
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./docker-volume/db-data:/var/lib/mysql
+    healthcheck:
+      test: mysql --user=root --password=$$MYSQL_ROOT_PASSWORD --silent --execute "use openmetadata_db"
+      interval: 15s
+      timeout: 10s
+      retries: 10
+    networks:
+      - iceberg_network
+
+  elasticsearch:
+    container_name: openmetadata_elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.4
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    healthcheck:
+      test: "curl -s http://localhost:9200/_cluster/health?pretty | grep status | grep -qE 'green|yellow' || exit 1"
+      interval: 15s
+      timeout: 10s
+      retries: 10
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+    networks:
+      - iceberg_network
+
+  execute-migrate-all:
+    container_name: execute_migrate_all
+    image: docker.getcollate.io/openmetadata/server:1.10.7
+    command: "./bootstrap/openmetadata-ops.sh migrate"
+    environment:
+      OPENMETADATA_CLUSTER_NAME: ${OPENMETADATA_CLUSTER_NAME:-openmetadata}
+      SERVER_PORT: ${SERVER_PORT:-8585}
+      SERVER_ADMIN_PORT: ${SERVER_ADMIN_PORT:-8586}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+
+      # Migration
+      MIGRATION_LIMIT_PARAM: ${MIGRATION_LIMIT_PARAM:-1200}
+
+      # DB configuration
+      DB_DRIVER_CLASS: ${DB_DRIVER_CLASS:-com.mysql.cj.jdbc.Driver}
+      DB_SCHEME: ${DB_SCHEME:-mysql}
+      DB_PARAMS: ${DB_PARAMS:-allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC}
+      DB_USER: ${DB_USER:-openmetadata_user}
+      DB_USER_PASSWORD: ${DB_USER_PASSWORD:-openmetadata_password}
+      DB_HOST: ${DB_HOST:-mysql}
+      DB_PORT: ${DB_PORT:-3306}
+      OM_DATABASE: ${OM_DATABASE:-openmetadata_db}
+
+      # ElasticSearch Configurations
+      ELASTICSEARCH_HOST: ${ELASTICSEARCH_HOST:-elasticsearch}
+      ELASTICSEARCH_PORT: ${ELASTICSEARCH_PORT:-9200}
+      ELASTICSEARCH_SCHEME: ${ELASTICSEARCH_SCHEME:-http}
+      ELASTICSEARCH_USER: ${ELASTICSEARCH_USER:-""}
+      ELASTICSEARCH_PASSWORD: ${ELASTICSEARCH_PASSWORD:-""}
+      SEARCH_TYPE: ${SEARCH_TYPE:-"elasticsearch"}
+
+      # OpenMetadata Server Pipeline Service Client Configuration
+      PIPELINE_SERVICE_CLIENT_ENDPOINT: ${PIPELINE_SERVICE_CLIENT_ENDPOINT:-http://ingestion:8080}
+      SERVER_HOST_API_URL: ${SERVER_HOST_API_URL:-http://openmetadata-server:8585/api}
+
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    networks:
+      - iceberg_network
+  
+  # ----------------------------------------
+  # 9. OpenMetadata server
+  # ----------------------------------------
+  openmetadata-server:
+    container_name: openmetadata_server
+    restart: always
+    image: docker.getcollate.io/openmetadata/server:1.10.7
+    environment:
+      OPENMETADATA_CLUSTER_NAME: ${OPENMETADATA_CLUSTER_NAME:-openmetadata}
+      SERVER_PORT: ${SERVER_PORT:-8585}
+      SERVER_ADMIN_PORT: ${SERVER_ADMIN_PORT:-8586}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      
+      AUTHORIZER_ENABLE_SECURE_SOCKET: "false"
+      AUTHENTICATION_ENABLE_SELF_SIGNUP: "true"
+      
+      # DB configuration
+      DB_DRIVER_CLASS: ${DB_DRIVER_CLASS:-com.mysql.cj.jdbc.Driver}
+      DB_SCHEME: ${DB_SCHEME:-mysql}
+      DB_PARAMS: ${DB_PARAMS:-allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC}
+      DB_USER: ${DB_USER:-openmetadata_user}
+      DB_USER_PASSWORD: ${DB_USER_PASSWORD:-openmetadata_password}
+      DB_HOST: ${DB_HOST:-mysql}
+      DB_PORT: ${DB_PORT:-3306}
+      OM_DATABASE: ${OM_DATABASE:-openmetadata_db}
+
+      # ElasticSearch Configurations
+      ELASTICSEARCH_HOST: ${ELASTICSEARCH_HOST:-elasticsearch}
+      ELASTICSEARCH_PORT: ${ELASTICSEARCH_PORT:-9200}
+      ELASTICSEARCH_SCHEME: ${ELASTICSEARCH_SCHEME:-http}
+      ELASTICSEARCH_USER: ${ELASTICSEARCH_USER:-""}
+      ELASTICSEARCH_PASSWORD: ${ELASTICSEARCH_PASSWORD:-""}
+      SEARCH_TYPE: ${SEARCH_TYPE:-"elasticsearch"}
+
+      # OpenMetadata Server Pipeline Service Client Configuration
+      PIPELINE_SERVICE_CLIENT_ENDPOINT: ${PIPELINE_SERVICE_CLIENT_ENDPOINT:-http://ingestion:8080}
+      SERVER_HOST_API_URL: ${SERVER_HOST_API_URL:-http://openmetadata-server:8585/api}
+
+    expose:
+      - 8585
+      - 8586
+    ports:
+      - "8585:8585"
+      - "8586:8586"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      execute-migrate-all:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [ "CMD", "wget", "-q", "--spider",  "http://localhost:8586/healthcheck" ]
+    networks:
+      - iceberg_network
+  # ----------------------------------------
+  # 10. Ingestion
+  # ----------------------------------------
+  ingestion:
+    container_name: openmetadata_ingestion
+    image: docker.getcollate.io/openmetadata/ingestion:1.10.7
+    depends_on:
+      elasticsearch:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+      openmetadata-server:
+        condition: service_started
+    environment:
+      AIRFLOW__API__AUTH_BACKENDS: "airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session"
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__OPENMETADATA_AIRFLOW_APIS__DAG_GENERATED_CONFIGS: "/opt/airflow/dag_generated_configs"
+      DB_HOST: ${AIRFLOW_DB_HOST:-mysql}
+      DB_PORT: ${AIRFLOW_DB_PORT:-3306}
+      AIRFLOW_DB: ${AIRFLOW_DB:-airflow_db}
+      DB_SCHEME: ${AIRFLOW_DB_SCHEME:-mysql+mysqldb}
+      DB_USER: ${AIRFLOW_DB_USER:-airflow_user}
+      DB_PASSWORD: ${AIRFLOW_DB_PASSWORD:-airflow_pass}
+      DB_PROPERTIES: ${AIRFLOW_DB_PROPERTIES:-}
+    entrypoint: /bin/bash
+    command:
+      - "/opt/airflow/ingestion_dependency.sh"
+    expose:
+      - 8080
+    ports:
+      - "8081:8080"   # host:8081 -> OM Airflow; your own Airflow uses 8080
+    volumes:
+      - ingestion-volume-dag-airflow:/opt/airflow/dag_generated_configs
+      - ingestion-volume-dags:/opt/airflow/dags
+      - ingestion-volume-tmp:/tmp
+    networks:
+      - iceberg_network
+    
+  # ----------------------------------------
+  # 11. Superset
+  # ----------------------------------------
+
+  redis:
+    image: redis:7
+    container_name: superset_cache
+    volumes:
+      - redis:/data
+    networks:
+      - iceberg_network
+
+  db:
+    env_file:
+      - path: .env
+        required: true
+      - path: .env-local
+        required: false
+    image: postgres:16
+    container_name: superset_db
+    volumes:
+      - db_home:/var/lib/postgresql/data
+    networks:
+      - iceberg_network
+
+  superset:
+    env_file:
+      - path: .env
+        required: true
+      - path: .env-local
+        required: false
+    image: *superset-image
+    container_name: superset_app
+    command: ["/app/docker/docker-bootstrap.sh", "app-gunicorn"]
+    user: "root"
+    ports:
+      - 8088:8088
+    depends_on:
+      superset-init:
+        condition: service_completed_successfully
+    volumes: *superset-volumes
+    networks:
+      - iceberg_network
+
+  superset-init:
+    image: *superset-image
+    container_name: superset_init
+    command: ["/app/docker/docker-init.sh"]
+    env_file:
+      - path: .env
+        required: true
+      - path: .env-local
+        required: false
+    depends_on:
+      db:
+        condition: service_started
+      redis:
+        condition: service_started
+    user: "root"
+    volumes: *superset-volumes
+    healthcheck:
+      disable: true
+    networks:
+      - iceberg_network
+
+  superset-worker:
+    image: *superset-image
+    container_name: superset_worker
+    command: ["/app/docker/docker-bootstrap.sh", "worker"]
+    env_file:
+      - path: .env
+        required: true
+      - path: .env-local
+        required: false
+    depends_on:
+      superset-init:
+        condition: service_completed_successfully
+    user: "root"
+    volumes: *superset-volumes
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "celery -A superset.tasks.celery_app:app inspect ping -d celery@$$HOSTNAME",
+        ]
+    networks:
+      - iceberg_network
+
+  superset-worker-beat:
+    image: *superset-image
+    container_name: superset_worker_beat
+    command: ["/app/docker/docker-bootstrap.sh", "beat"]
+    env_file:
+      - path: .env
+        required: true
+      - path: .env-local
+        required: false
+    depends_on:
+      superset-init:
+        condition: service_completed_successfully
+    user: "root"
+    volumes: *superset-volumes
+    healthcheck:
+      disable: true
+    networks:
+      - iceberg_network
+
+
+
 volumes:
   pgdata_airflow:
   clickhouse_data:
   minio_data:
+  es-data:
+  ingestion-volume-dag-airflow:
+  ingestion-volume-dags:
+  ingestion-volume-tmp:
+  db-data:
+  elasticsearch:
+  superset_home:
+    external: false
+  db_home:
+    external: false
+  redis:
+    external: false
+  
