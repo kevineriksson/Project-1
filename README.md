@@ -291,3 +291,37 @@ SETTINGS
 
 ---
 
+### 9. Open Metadata Integration
+
+This project uses OpenMetadata as the data governance layer for documenting datasets, running data quality tests, and cataloging analytical assets.
+This section describes how to connect ClickHouse to OpenMetadata, apply the required roles, and access the OpenMetadata and Superset UIs.
+
+Open a browser and navigate to:
+http://localhost:8585
+
+Default credentials:
+Username: admin@open-metadata.org
+Password: admin
+
+If login is successful, you will see the OpenMetadata home page with the search bar and the sidebar navigation.
+
+After logging in, you can:
+Browse the ClickHouse tables under Explore → Databases → ClickHouse
+View table and column descriptions
+View and run data quality tests under Profiler & Data Quality
+
+### 10. Apache Superset Integration
+How to Access Apache Superset
+
+Superset is available once all containers are running.
+
+Open: http://localhost:8088
+
+Login credentials
+Username: admin
+Password: admin
+
+Inside Superset:
+Go to Data → Databases to verify your ClickHouse connection
+Go to Dashboards to view the movie analytics dashboard
+Charts and filters are fully interactive
