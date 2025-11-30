@@ -289,39 +289,76 @@ SETTINGS
 ```
 <img width="1804" height="768" alt="image" src="https://github.com/user-attachments/assets/60dcb654-85b9-4a83-a622-941a608a8d52" />
 
----
 
-### 9. Open Metadata Integration
+# **9. OpenMetadata Integration**
 
-This project uses OpenMetadata as the data governance layer for documenting datasets, running data quality tests, and cataloging analytical assets.
-This section describes how to connect ClickHouse to OpenMetadata, apply the required roles, and access the OpenMetadata and Superset UIs.
+This project uses **OpenMetadata** as the data governance layer to document datasets, run data quality tests, and catalog analytical assets.
 
-Open a browser and navigate to:
+### **Accessing OpenMetadata**
+
+Once the project is running:
+
+```bash
+docker compose up -d
+```
+
+Open OpenMetadata in your browser:
+
+```
 http://localhost:8585
+```
 
-Default credentials:
-Username: admin@open-metadata.org
-Password: admin
+**Login credentials:**
 
-If login is successful, you will see the OpenMetadata home page with the search bar and the sidebar navigation.
+| Field    | Value                     |
+| -------- | ------------------------- |
+| Username | `admin@open-metadata.org` |
+| Password | `admin`                   |
 
 After logging in, you can:
-Browse the ClickHouse tables under Explore → Databases → ClickHouse
-View table and column descriptions
-View and run data quality tests under Profiler & Data Quality
 
-### 10. Apache Superset Integration
-How to Access Apache Superset
+* Browse the ClickHouse tables under
+  **Explore → Databases → ClickHouse**
+* View table-level and column-level descriptions
+* Run and inspect **data quality tests** under
+  **Profiler & Data Quality**
 
-Superset is available once all containers are running.
+### **Example Screenshots**
 
-Open: http://localhost:8088
+| Data Quality Tests                                                                                                      | Column Descriptions                                                                                                     |
+| ----------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| <img width="1587" height="308" src="https://github.com/user-attachments/assets/9f549e98-ba38-4e18-90c9-6ee95dee5070" /> | <img width="1588" height="287" src="https://github.com/user-attachments/assets/fbf130e7-295b-4455-b473-aa431db848c0" /> |
 
-Login credentials
-Username: admin
-Password: admin
+---
+
+# **10. Apache Superset Integration**
+
+Apache Superset is used to create the BI dashboard for analyzing movie performance metrics.
+
+### **Accessing Superset**
+
+Open in your browser:
+
+```
+http://localhost:8088
+```
+
+**Login credentials:**
+
+| Field    | Value   |
+| -------- | ------- |
+| Username | `admin` |
+| Password | `admin` |
 
 Inside Superset:
-Go to Data → Databases to verify your ClickHouse connection
-Go to Dashboards to view the movie analytics dashboard
-Charts and filters are fully interactive
+
+* Go to **Data → Databases** to verify ClickHouse connection
+* Go to **Dashboards** to open the movie ratings dashboard
+* Use the filter to slice results (e.g., by genre)
+
+### **Example Screenshots**
+
+| Dashboard Overview                                                                                                      | Filter Example                                                                                                         |
+| ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| <img width="1643" height="404" src="https://github.com/user-attachments/assets/f9155b7e-34ab-45de-87af-578309a130a5" /> | <img width="831" height="440" src="https://github.com/user-attachments/assets/5758db85-fb2b-4e2c-a803-720e2f5c4137" /> |
+
