@@ -381,7 +381,8 @@ After logging in, you can:
 | Data Quality Tests                                                                                                      | Column Descriptions                                                                                                     |
 | ----------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | <img width="1587" height="308" src="https://github.com/user-attachments/assets/9f549e98-ba38-4e18-90c9-6ee95dee5070" /> | <img width="1199" height="558" alt="Screenshot 2025-11-30 at 12 46 02" src="https://github.com/user-attachments/assets/def3eeaa-697c-4d26-9226-a8920ef320e5" />
-| <img width="1588" height="287" src="https://github.com/user-attachments/assets/fbf130e7-295b-4455-b473-aa431db848c0" /> |
+| <img width="1588" height="287" src="https://github.com/user-attachments/assets/fbf130e7-295b-4455-b473-aa431db848c0" /> |<img width="1333" height="562" alt="Screenshot 2025-11-30 at 12 10 55" src="https://github.com/user-attachments/assets/bac171de-5dde-44ad-9f33-85d34aaa9de9" />
+
 
 ---
 
