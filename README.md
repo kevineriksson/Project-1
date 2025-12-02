@@ -418,6 +418,18 @@ Password: admin
 ```
 
 Inside Superset:
+In Superset, you need to register the database connection:
+
+Go to Settings → Database Connections.
+
+Click + Database.
+
+Choose ClickHouse Connect as the database type.
+Fill in the connection details:
+* Host: clickhouse-server
+* Port: 8123
+* Username: default
+* Test and Connect: Verify that tables are available for visualization.
 
 * Go to **Data → Databases** to verify ClickHouse connection
 * Go to **Dashboards** to open the movie ratings dashboard
