@@ -382,11 +382,11 @@ Fill in the Connection Details:
 * Username: dbt_user
 * Password: dbt_password
 * Database / Schema: Leave empty.
-* Https / Secure: Leave them off.
+* Https / Secure: Leave off.
 
 Click Test Connection. If successful, click Next and Save the service.
 
-Metadata Agent Deployment: Once the Metadata Agent has successfully run, you should be able to see the tables and columns in OpenMetadata.
+Once the Metadata Agent has successfully run, you should be able to see the tables and columns in OpenMetadata.
 
 ### **Example Screenshots**
 
